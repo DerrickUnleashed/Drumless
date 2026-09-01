@@ -1,10 +1,9 @@
 """Input handling — turn either a file or a YouTube URL into a 44.1kHz stereo WAV."""
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
-import tempfile
+import sys
 from pathlib import Path
 
 from .audio_utils import convert_to_wav44100_stereo, get_duration_seconds
@@ -14,6 +13,28 @@ MAX_DURATION_SECONDS = 10 * 60
 
 # Formats we accept for direct file upload
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".m4a", ".flac", ".aac", ".ogg", ".opus", ".webm"}
+
+# Targeted help shown only when yt-dlp reports its missing-JS-runtime warning
+# AND we couldn't auto-detect a runtime on PATH (node/deno/bun).
+JS_RUNTIME_HINT = (
+    "  0. YouTube requires a JS runtime for extraction and none was found on "
+    "your PATH. Install one with:\n"
+    "       brew install deno     (recommended)\n"
+    "     or  brew install node   (Drumless auto-detects either).\n"
+)
+
+
+def _find_js_runtime_args() -> list[str]:
+    """Return `--js-runtimes` CLI args if a usable JS runtime is on PATH.
+
+    Newer yt-dlp only enables deno by default, so node/bun need to be passed
+    explicitly or extraction fails with "No supported JavaScript runtime".
+    """
+    for runtime in ("node", "deno", "bun"):
+        path = shutil.which(runtime)
+        if path:
+            return ["--js-runtimes", f"{runtime}:{path}"]
+    return []
 
 
 class InputError(Exception):
@@ -63,15 +84,21 @@ def download_youtube(url: str, workdir: Path) -> Path:
     message on download failures (yt-dlp/YouTube is a moving target).
     """
     workdir.mkdir(parents=True, exist_ok=True)
+    js_runtime_args = _find_js_runtime_args()
     cmd = [
-        "yt-dlp",
+        # Run yt-dlp as a module via the current interpreter so it works even
+        # when .venv/bin isn't on PATH.
+        sys.executable, "-m", "yt_dlp",
         "-f", "bestaudio/best",
         "-x", "--audio-format", "wav",
         "--audio-quality", "0",
         "-o", str(workdir / "yt_%(id)s.%(ext)s"),
         "--no-playlist",
-        "--max-downloads", "1",
         "--postprocessor-args", "ffmpeg:-ar 44100 -ac 2",
+        *js_runtime_args,
+        # Fetch the EJS challenge-solver script so YouTube's JS/n challenges
+        # resolve without manual setup (see wikis/External-Programs).
+        "--remote-components", "ejs:github",
         url,
     ]
     try:
@@ -83,22 +110,26 @@ def download_youtube(url: str, workdir: Path) -> Path:
     except subprocess.TimeoutExpired:
         raise InputError("YouTube download timed out (5 min). The video may be very long or blocked.")
 
+    # Find the produced wav first: a nonzero exit code can be an *abort*, not a
+    # failure (e.g. "Maximum number of downloads reached"), so if the WAV exists
+    # we treat the run as a success and only report real failures otherwise.
+    wav_files = sorted(workdir.glob("yt_*.wav"))
+    if wav_files:
+        wav_path = wav_files[0]
+        _validate_duration(wav_path)
+        return wav_path
+
     if result.returncode != 0:
         # Surface a troubleshooting-oriented message rather than a raw stack trace.
         raise InputError(
             "Failed to download from YouTube. This is very often a yt-dlp staleness issue.\n\n"
             "Troubleshooting steps:\n"
-            "  1. Update yt-dlp:  pip install -U yt-dlp  (or: yt-dlp -U)\n"
+            + (JS_RUNTIME_HINT if "No supported JavaScript runtime" in result.stderr else "")
+            + "  1. Update yt-dlp:  pip install -U yt-dlp  (or: yt-dlp -U)\n"
             "  2. If it still fails, YouTube may be requiring browser cookies. Pass your "
             "browser's cookies file, e.g. add:  --cookies-from-browser chrome\n\n"
-            f"Last error output:\n{result.stderr[-1500:]}"
+            f"Last error output:\n{(result.stderr or '')[-1500:] or (result.stdout or '')[-1500:]}"
         )
 
-    # Find the produced wav (only one download because --max-downloads 1)
-    wav_files = sorted(workdir.glob("yt_*.wav"))
-    if not wav_files:
-        raise InputError("Download succeeded but no WAV was produced (unexpected yt-dlp behavior).")
-    wav_path = wav_files[0]
-
-    _validate_duration(wav_path)
-    return wav_path
+    # Exit code 0 but no WAV produced — shouldn't happen with -x/--audio-format wav.
+    raise InputError("Download reported success but no WAV was produced (unexpected yt-dlp behavior).")
