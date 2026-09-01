@@ -18,7 +18,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
-import tempfile
+import sys
 from pathlib import Path
 from typing import Callable
 
@@ -43,25 +43,27 @@ def run_demucs(
     progress_cb: Callable[[int], None] | None = None,
     job_id: str = "job",
 ) -> Path:
-    """Run Demucs on input_wav and return the per-job output folder.
+    """Run Demucs on input_wav and return the folder containing the four stems
+    (drums/bass/vocals/other .wav files).
 
-    progress_cb(received_msgs) is called with an opaque message/tick counter;
-    because demucs' own progress bar is hard to parse reliably via subprocess,
-    we report coarse stage-level progress instead (see app.py usage of itertools).
+    Each job is isolated under separated/<job_id>/ — demucs writes stems to
+    <out>/<model>/<trackname>/ inside that root, where <trackname> is derived
+    from the input filename (sanitized), so we locate it by searching.
     """
-    # Use a temp dir so concurrent jobs don't collide on demucs' global
-    # 'separated/' output directory.
-    job_output = DEMUCS_OUTPUT_DIR / job_id
-    if job_output.exists():
-        shutil.rmtree(job_output, ignore_errors=True)
+    job_root = DEMUCS_OUTPUT_DIR / job_id
+    if job_root.exists():
+        shutil.rmtree(job_root, ignore_errors=True)
+    job_root.mkdir(parents=True, exist_ok=True)
 
     # The 4-stem htdemucs model produces drums/bass/vocals/other.  We do NOT use
     # --two-stems, which would collapse into just vocals/other and lose the
     # bass + drums isolation we need for the beat-detection fallback.
     cmd = [
-        "demucs",
+        # Run demucs as a module via the current interpreter, mirroring the
+        # yt-dlp approach: works even when .venv/bin isn't on PATH.
+        sys.executable, "-m", "demucs",
         "-n", model,
-        "-o", str(DEMUCS_OUTPUT_DIR),
+        "-o", str(job_root),
         str(input_wav),
     ]
 
@@ -87,7 +89,12 @@ def run_demucs(
             f"Output tail:\n{result.stdout[-1000:]}\n{result.stderr[-1000:]}"
         )
 
-    return job_output
+    # Locate the stem dir rather than re-deriving the sanitized trackname.
+    stem_dirs = [p.parent for p in job_root.rglob("drums.wav")]
+    if not stem_dirs:
+        raise SeparationError(
+            "Demucs finished but no drums.wav was found. Looked under: " + str(job_root))
+    return stem_dirs[0]
 
 
 def build_backing_track(stem_dir: Path, out_path: Path, sr: int = 44100) -> Path:
