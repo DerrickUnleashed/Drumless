@@ -1,2 +1,6 @@
 .venv
 __pycache__/
+
+# pipeline artifacts
+separated/
+drumless_output/
