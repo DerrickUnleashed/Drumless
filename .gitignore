@@ -4,6 +4,7 @@ __pycache__/
 # pipeline artifacts
 separated/
 drumless_output/
+server/data/
 
 .gradio/
 

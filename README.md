@@ -13,7 +13,7 @@ Two clients, one processing engine:
 
 The phone can't run Demucs, so the Android app is a thin client: it uploads a file
 (or sends a YouTube URL) to the backend, polls for progress, and plays/downloads the
-three output variants (backing / click / mixed).
+two output variants (backing only / backing + click).
 
 ---
 
@@ -35,8 +35,8 @@ uvicorn api:app --host 0.0.0.0 --port 8000
 
 - `POST /api/jobs` — multipart `file` **or** form `url` (YouTube). Returns `{job_id}`.
 - `GET /api/jobs/{id}` — polls status/progress/BPM; `files` maps variants → audio URLs.
-- `POST /api/jobs/{id}/regen` — `{bpm?, click_gain_db?, speed?}` re-renders click/mixed.
-- `GET /api/jobs/{id}/audio/{variant}.wav` — streams `backing`/`click`/`mixed`.
+- `POST /api/jobs/{id}/regen` — `{bpm?, click_gain_db?}` re-renders click/mixed.
+- `GET /api/jobs/{id}/audio/{variant}.wav` — streams `backing`/`mixed`.
 
 ### Desktop Gradio UI (optional)
 
@@ -95,7 +95,6 @@ server/
     separation.py       Demucs stems + backing build (bass+vocals+other)
     tempo.py            librosa BPM + beat detection (drums-stem preferred)
     click_track.py      librosa.clicks metronome + click/backing mix
-    time_stretch.py     pyrubberband / librosa time-stretch (no pitch change)
     audio_utils.py      ffmpeg conversion, export, mixing, gain
     pipeline.py         stage orchestrator
   Dockerfile            containerized backend
