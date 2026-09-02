@@ -1,0 +1,25 @@
+# Render blueprint for the Drumless backend.
+#
+# Requirements on Render:
+#   - Use the Standard (or higher) instance type: Demucs needs ~4GB RAM on CPU.
+#   - Attach a persistent disk at /data and set DATA_DIR=/data (see api.py) so
+#     model weights (~300MB) and job outputs survive restarts.
+#   - YouTube downloads from datacenter IPs are fragile; the upload path is the
+#     reliable one.
+services:
+  - type: web
+    name: drumless-api
+    runtime: docker
+    plan: standard
+    disk:
+      name: drumless-data
+      mountPath: /app/data
+      sizeGB: 10
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATA_DIR
+        value: /app/data
+      # Keep Demucs model weights (~300MB) on persistent disk so you don't
+      # re-download them on every deploy/restart.
+      - key: TORCH_HOME
+        value: /app/data/torch
