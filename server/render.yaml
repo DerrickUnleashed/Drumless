@@ -11,6 +11,7 @@ services:
     name: drumless-api
     runtime: docker
     plan: standard
+    rootDir: server
     disk:
       name: drumless-data
       mountPath: /app/data
