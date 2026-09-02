@@ -46,28 +46,32 @@ python server/app.py    # Gradio at http://127.0.0.1:7860
 
 ### Deploy (Render)
 
-`server/render.yaml` + `Dockerfile` are included. Requirements: **Standard instance
-(~4GB RAM for Demucs on CPU)**, a **persistent disk** mounted at `/app/data` (job
-outputs + `TORCH_HOME` model cache survive restarts). YouTube-from-datacenter-IP is
-fragile — the upload path is the dependable one.
+`server/render.yaml` + `Dockerfile` are included. The service is currently deployed
+on Render's **free tier** at `https://drumless.onrender.com/` (file uploads are the
+dependable path — YouTube blocks datacenter IPs).
 
-To deploy so your phone works anywhere (no computer on):
+To deploy/update:
 
-1. Push this repo to GitHub (Render builds from the repo).
-2. In the Render dashboard: **New + → Blueprint**, pick the repo, and accept
-   `render.yaml` (Standard plan, 10GB disk). Render shows the service preview.
-3. Deploy. On the first boot Demucs downloads its model weights (~300MB) into the
-   persistent disk — the first job takes a while.
-4. Your service lives at `https://<name>.onrender.com` (e.g.
-   `https://drumless-api.onrender.com`). Verify with
-   `curl https://<name>.onrender.com/api/health` → `{"status":"ok"}`.
-5. In the Android app's **Backend URL** field, enter `https://<name>.onrender.com/`
-   and you're set — no LAN IP needed. (The backend is HTTPS, which Android requires
-   for cleartext-free networking.)
+1. Push this repo to GitHub (Render builds from the repo; `rootDir: server` points
+   at the backend).
+2. Create a web service (or Blueprint from `render.yaml`), branch `master`,
+   Docker runtime, health check `/api/health`, env vars `DATA_DIR=/app/data` and
+   `TORCH_HOME=/app/data/torch`.
+3. Verify: `curl https://<name>.onrender.com/api/health` → `{"status":"ok"}`.
+4. In the Android app's **Backend URL** field enter `https://<name>.onrender.com/`
+   — no LAN IP needed. (The backend is HTTPS, which Android requires.)
 
-> Deployed backend accepts **one job at a time** (serial guard) so the 4GB box
-> doesn't OOM on concurrent Demucs runs. Upload files rather than YouTube URLs —
-> YouTube effectively blocks datacenter IPs.
+**Free tier reality check** (why the config defaults to it today):
+- 512MB RAM: separation can **OOM on long songs** — keep track uploads short.
+- No persistent disk: Demucs model weights (~300MB) re-download on every cold
+  start (first request after idle can take minutes), and job outputs don't
+  survive restarts.
+- Deployed backend accepts **one job at a time** (serial guard) so a second
+  concurrent Demucs run doesn't blow up the box.
+
+**Upgrade for real use** (`render.yaml` documents this): switch plan to `standard`
+(4GB) and attach a persistent disk at `/app/data` — then weights + outputs persist
+and any reasonably-sized track works.
 
 ---
 

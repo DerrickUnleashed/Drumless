@@ -1,26 +1,32 @@
 # Render blueprint for the Drumless backend.
 #
-# Requirements on Render:
-#   - Use the Standard (or higher) instance type: Demucs needs ~4GB RAM on CPU.
-#   - Attach a persistent disk at /data and set DATA_DIR=/data (see api.py) so
-#     model weights (~300MB) and job outputs survive restarts.
-#   - YouTube downloads from datacenter IPs are fragile; the upload path is the
-#     reliable one.
+# Currently deployed on the FREE tier for evaluation:
+#   - plan: free  (512MB RAM, no persistent disk)
+#   - No disk: Demucs model weights (~300MB) and job outputs live on the
+#     ephemeral container filesystem — they're re-downloaded on each cold
+#     start, and outputs vanish on restart. Keep practice tracks SHORT: the
+#     512MB box can OOM on long songs. YouTube-from-datacenter-IP is fragile;
+#     the file-upload path is the reliable one.
+#
+# Paid upgrade path (recommended for real use), then uncomment the disk +
+# switch plan to standard:
+#   - plan: standard (4GB RAM runs Demucs comfortably)
+#   - disk mounted at /app/data so model weights + job outputs persist
 services:
   - type: web
     name: drumless-api
     runtime: docker
-    plan: standard
+    plan: free
     rootDir: server
-    disk:
-      name: drumless-data
-      mountPath: /app/data
-      sizeGB: 10
     healthCheckPath: /api/health
+    # disk:
+    #   name: drumless-data
+    #   mountPath: /app/data
+    #   sizeGB: 10
     envVars:
       - key: DATA_DIR
         value: /app/data
-      # Keep Demucs model weights (~300MB) on persistent disk so you don't
-      # re-download them on every deploy/restart.
+      # Keep Demucs model weights (~300MB) in one place; on the paid plan with a
+      # disk at /app/data they survive restarts instead of being re-downloaded.
       - key: TORCH_HOME
         value: /app/data/torch
