@@ -56,11 +56,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         launchJob { api.createFromFile(Api.filePart(displayName(uri), readBytes(uri))) }
     }
 
-    fun regen(bpm: Double?, clickGainDb: Double?, speed: Double?) {
+    fun regen(bpm: Double?, clickGainDb: Double?) {
         val id = _state.value.jobId ?: return
         viewModelScope.launch {
             try {
-                api.regen(id, com.drumless.app.data.RegenRequest(bpm, clickGainDb, speed))
+                api.regen(id, com.drumless.app.data.RegenRequest(bpm, clickGainDb))
                 poll(id) // refresh files after regen
             } catch (e: Exception) {
                 setError(e)

@@ -26,7 +26,6 @@ data class JobStatus(
 data class RegenRequest(
     val bpm: Double? = null,
     @SerialName("click_gain_db") val clickGainDb: Double? = null,
-    val speed: Double? = null,
 )
 
 @Serializable

@@ -30,11 +30,9 @@ fun ResultsScreen(vm: MainViewModel, state: UiState) {
 
     var bpmText by remember(job.bpm) { mutableStateOf((job.bpm?.roundToInt() ?: 120).toString()) }
     var gainDb by remember { mutableStateOf(-6f) }
-    var speedPct by remember { mutableStateOf(100f) }
 
     val base = remember(state.baseUrl) { state.baseUrl.trimEnd('/') }
     val urlBacking = job.files["backing"]?.let { base + it }
-    val urlClick = job.files["click"]?.let { base + it }
     val urlMixed = job.files["mixed"]?.let { base + it }
 
     Column(
@@ -66,23 +64,14 @@ fun ResultsScreen(vm: MainViewModel, state: UiState) {
         Text("Click volume: ${gainDb.roundToInt()} dB", style = MaterialTheme.typography.labelLarge)
         Slider(value = gainDb, onValueChange = { gainDb = it }, valueRange = -20f..0f)
 
-        Text("Practice speed: $speedPct%", style = MaterialTheme.typography.labelLarge)
-        Slider(
-            value = speedPct,
-            onValueChange = { speedPct = it },
-            valueRange = 50f..150f,
-            steps = 19,
-        )
-
         Button(
-            onClick = { vm.regen(bpmText.toDoubleOrNull(), gainDb.toDouble(), speedPct.toDouble()) },
+            onClick = { vm.regen(bpmText.toDoubleOrNull(), gainDb.toDouble()) },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Apply BPM / click volume / speed")
+            Text("Apply BPM / click volume")
         }
 
         if (urlBacking != null) TrackPlayerCard("Backing (no drums)", urlBacking, "backing")
-        if (urlClick != null) TrackPlayerCard("Click only", urlClick, "click")
         if (urlMixed != null) TrackPlayerCard("Mixed (backing + click)", urlMixed, "mixed")
 
         if (state.error != null) {
