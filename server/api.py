@@ -5,8 +5,8 @@ simple job API:
 
     POST /api/jobs                 create a job (multipart file OR youtube url)
     GET  /api/jobs/{id}            status/progress/result (poll every ~2s)
-    POST /api/jobs/{id}/regen      regenerate click/mixed at BPM/gain/speed
-    GET  /api/jobs/{id}/audio/{v}  stream an output file (backing/click/mixed)
+    POST /api/jobs/{id}/regen      regenerate the click/mixed at a BPM + gain
+    GET  /api/jobs/{id}/audio/{v}  stream an output file (backing or mixed)
 
 Design notes / production caveats:
   - Single-process, in-memory job store + files on disk.  Fine for personal /
@@ -36,7 +36,6 @@ from pydantic import BaseModel
 from drumless.pipeline import process_track
 from drumless.audio_utils import load_audio_as_numpy, save_numpy_as_wav
 from drumless.click_track import synthesize_click_track, build_mixed_track
-from drumless.time_stretch import time_stretch
 
 # Job outputs + uploads land here.  Point DATA_DIR at a persistent disk in prod
 # (e.g. Render's mount, /app/data) so results survive restarts.
@@ -110,14 +109,13 @@ def _run_job(job: Job, uploaded_file: str | None, yt_url: str | None) -> None:
 
         variants = {
             "backing": result["files"]["backing"],
-            "click": result["files"]["click"],
             "mixed": result["files"]["mixed"],
         }
         # Mobile MVP streams WAVs (mp3 transcoding can be added server-side later).
         job.files = {v: _url_for(job.id, v, "wav") for v in variants}
         job._source_paths = {
             "backing": Path(variants["backing"]["wav"]),
-            "click": Path(variants["click"]["wav"]),
+            "click": Path(result["files"]["click"]["wav"]),
             "mixed": Path(variants["mixed"]["wav"]),
         }
         job.detail_dir = _dir_for(job)
@@ -178,7 +176,6 @@ async def create_job(
 class RegenRequest(BaseModel):
     bpm: float | None = None
     click_gain_db: float | None = None
-    speed: float | None = None
 
 
 @app.post("/api/jobs/{job_id}/regen")
@@ -217,7 +214,6 @@ def regen(job_id: str, req: RegenRequest):
 
     job._source_paths["click"] = click_out
     job._source_paths["mixed"] = mixed_out
-    job.files["click"] = _url_for(job.id, "click", "wav")
     job.files["mixed"] = _url_for(job.id, "mixed", "wav")
     return {"job_id": job_id, "bpm": bpm}
 
