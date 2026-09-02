@@ -9,38 +9,27 @@ into audio players and download buttons.
 """
 from __future__ import annotations
 
-import os
-import shutil
-import tempfile
 import time
 from pathlib import Path
 from typing import Callable
 
-import numpy as np
-
 from .audio_utils import (
-    convert_to_wav44100_stereo,
     load_audio_as_numpy,
-    mix_tracks,
     save_numpy_as_wav,
     wav_to_mp3,
 )
 from .click_track import build_mixed_track, synthesize_click_track
 from .input_handler import (
-    DurationError,
     InputError,
     download_youtube,
     process_file_upload,
 )
 from .separation import (
-    DEMUCS_OUTPUT_DIR,
-    STEM_NAMES,
     SeparationError,
     build_backing_track,
     run_demucs,
 )
 from .tempo import detect_tempo
-from .time_stretch import time_stretch
 
 DEFAULT_CLICK_GAIN_DB = -6.0
 
@@ -113,20 +102,18 @@ def process_track(
     # -- 5. EXPORT -----------------------------------------------------------
     if progress_cb:
         progress_cb("(6/6) Exporting audio…")
-    backing_audio, sr = load_audio_as_numpy(backing_wav)
     click_audio, _ = load_audio_as_numpy(click_wav)
     mixed_audio = build_mixed_track(backing_audio, click_audio, DEFAULT_CLICK_GAIN_DB)
 
     backing_only_wav = workdir / f"{job_id}_backing_only.wav"
-    click_only_wav = workdir / f"{job_id}_click_only.wav"
+    click_wav_out = workdir / f"{job_id}_click_regen.wav"   # kept as regen source, not exposed
     mixed_wav = workdir / f"{job_id}_mixed.wav"
     save_numpy_as_wav(backing_audio, backing_only_wav, sr)
-    save_numpy_as_wav(click_audio, click_only_wav, sr)
+    save_numpy_as_wav(click_audio, click_wav_out, sr)
     save_numpy_as_wav(mixed_audio, mixed_wav, sr)
 
-    # MP3 variants
+    # MP3 variants for the two final outputs.
     backing_only_mp3 = wav_to_mp3(backing_only_wav, workdir / f"{job_id}_backing_only.mp3")
-    click_only_mp3 = wav_to_mp3(click_only_wav, workdir / f"{job_id}_click_only.mp3")
     mixed_mp3 = wav_to_mp3(mixed_wav, workdir / f"{job_id}_mixed.mp3")
 
     return {
@@ -137,46 +124,7 @@ def process_track(
         "model": model,
         "files": {
             "backing": {"wav": str(backing_only_wav), "mp3": str(backing_only_mp3)},
-            "click": {"wav": str(click_only_wav), "mp3": str(click_only_mp3)},
+            "click": {"wav": str(click_wav_out)},  # internal only — regen source
             "mixed": {"wav": str(mixed_wav), "mp3": str(mixed_mp3)},
         },
-    }
-
-
-FLASH_MP3_DIR = Path("flash_mp3")
-
-
-def stretch_and_mix(
-    backing_wav: str,
-    click_wav: str,
-    speed: float,
-    click_gain_db: float,
-    workdir: Path,
-) -> dict:
-    """Time-stretch the backing + click, remix at a given speed (stretch goal).
-
-    Returns new file paths for backing-only and mixed clips at that speed.
-    """
-    workdir = Path(workdir)
-    workdir.mkdir(parents=True, exist_ok=True)
-
-    sr = 44100
-    backing, _ = load_audio_as_numpy(backing_wav, sr)
-    click, _ = load_audio_as_numpy(click_wav, sr)
-
-    # clip speed into usable range handled in UI; here just apply
-    backing_st = time_stretch(backing, sr, speed)
-    click_st = time_stretch(click, sr, speed)
-    mixed = mix_tracks(backing_st, click_st, b_gain_db=click_gain_db)
-
-    tag = f"stretch_{int(round(speed * 100))}_{int(round(click_gain_db))}"
-    backing_out = workdir / f"{tag}_backing.wav"
-    mixed_out = workdir / f"{tag}_mixed.wav"
-    save_numpy_as_wav(backing_st, backing_out, sr)
-    save_numpy_as_wav(mixed, mixed_out, sr)
-
-    return {
-        "backing": str(backing_out),
-        "mixed": str(mixed_out),
-        "bpm": None,
     }
