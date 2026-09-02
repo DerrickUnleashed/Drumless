@@ -51,6 +51,24 @@ python server/app.py    # Gradio at http://127.0.0.1:7860
 outputs + `TORCH_HOME` model cache survive restarts). YouTube-from-datacenter-IP is
 fragile — the upload path is the dependable one.
 
+To deploy so your phone works anywhere (no computer on):
+
+1. Push this repo to GitHub (Render builds from the repo).
+2. In the Render dashboard: **New + → Blueprint**, pick the repo, and accept
+   `render.yaml` (Standard plan, 10GB disk). Render shows the service preview.
+3. Deploy. On the first boot Demucs downloads its model weights (~300MB) into the
+   persistent disk — the first job takes a while.
+4. Your service lives at `https://<name>.onrender.com` (e.g.
+   `https://drumless-api.onrender.com`). Verify with
+   `curl https://<name>.onrender.com/api/health` → `{"status":"ok"}`.
+5. In the Android app's **Backend URL** field, enter `https://<name>.onrender.com/`
+   and you're set — no LAN IP needed. (The backend is HTTPS, which Android requires
+   for cleartext-free networking.)
+
+> Deployed backend accepts **one job at a time** (serial guard) so the 4GB box
+> doesn't OOM on concurrent Demucs runs. Upload files rather than YouTube URLs —
+> YouTube effectively blocks datacenter IPs.
+
 ---
 
 ## Android app

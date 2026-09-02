@@ -151,6 +151,11 @@ async def create_job(
     if not file and not url:
         raise HTTPException(400, "Provide an audio `file` upload OR a YouTube `url`.")
 
+    # Cloud boxes are RAM-tight (Render Standard = 4GB): a second concurrent
+    # Demucs run would OOM the instance, so serialize jobs for now.
+    if any(j.status == "running" for j in JOBS.values()):
+        raise HTTPException(409, "Another job is already processing. Wait for it to finish, then retry.")
+
     job_id = f"job_{int(time.time() * 1000)}"
     job = Job(job_id)
     job.model = model

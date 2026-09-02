@@ -5,8 +5,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# ffmpeg for yt-dlp post-processing + export
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+# ffmpeg for yt-dlp post-processing + export; nodejs is the JS runtime
+# newer yt-dlp needs for YouTube extraction (input_handler auto-detects it).
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg nodejs && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
