@@ -30,8 +30,8 @@ data class UiState(
     val error: String? = null,
 )
 
-/** 10.0.2.2 = host machine loopback from the Android emulator. */
-const val DEFAULT_BASE_URL = "http://10.0.2.2:8000/"
+/** Render cloud backend (no local setup required). */
+const val DEFAULT_BASE_URL = "https://drumless.onrender.com/"
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -39,14 +39,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val state: StateFlow<UiState> = _state.asStateFlow()
 
     private var api: DrumlessApi = Api.client(DEFAULT_BASE_URL)
-
-    fun setBaseUrl(raw: String) {
-        val url = normalize(raw)
-        if (url != null) {
-            _state.update { it.copy(baseUrl = url) }
-            api = Api.client(url)
-        }
-    }
 
     fun submitUrl(youtubeUrl: String) {
         launchJob { api.createFromUrl(youtubeUrl.trim()) }

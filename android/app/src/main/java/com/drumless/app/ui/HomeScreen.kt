@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeScreen(vm: MainViewModel, state: UiState) {
     var urlInput by remember { mutableStateOf("") }
-    var baseUrlInput by remember { mutableStateOf(state.baseUrl) }
     var pickedName by remember { mutableStateOf<String?>(null) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -52,14 +51,6 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
         )
 
         OutlinedTextField(
-            value = baseUrlInput,
-            onValueChange = { baseUrlInput = it },
-            label = { Text("Backend URL") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        OutlinedTextField(
             value = urlInput,
             onValueChange = { urlInput = it },
             label = { Text("YouTube URL (optional)") },
@@ -68,7 +59,6 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
         )
         Button(
             onClick = {
-                vm.setBaseUrl(baseUrlInput)
                 vm.submitUrl(urlInput)
                 urlInput = ""
             },
@@ -79,10 +69,7 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
         }
 
         OutlinedButton(
-            onClick = {
-                vm.setBaseUrl(baseUrlInput)
-                picker.launch("audio/*")
-            },
+            onClick = { picker.launch("audio/*") },
             enabled = !state.submitting,
             modifier = Modifier.fillMaxWidth(),
         ) {
