@@ -63,12 +63,20 @@ def detect_tempo(
     )
     tempo = float(np.atleast_1d(tempo)[0])
 
+    # beat_track can return a degenerate tempo (0 / inf) on very short or
+    # atypical audio — clamp to a sane range so downstream math never divides
+    # by zero or produces a nonsense click grid.
+    if not np.isfinite(tempo) or not (30 <= tempo <= 400):
+        tempo = START_BPM
+
     # Also compute a plain tempo estimate (librosa.feature.tempo) for cross-check.
     hop_length = 512
     tempo_env = librosa.feature.tempo(
         y=mono, sr=sr_, hop_length=hop_length, start_bpm=START_BPM
     )
     tempo_env_val = float(np.atleast_1d(tempo_env)[0])
+    if not np.isfinite(tempo_env_val) or not (30 <= tempo_env_val <= 400):
+        tempo_env_val = tempo
 
     # Beat timestamps in seconds for click placement.
     beat_frame_times = librosa.frames_to_time(beat_frames, sr=sr_, hop_length=hop_length)
