@@ -6,8 +6,6 @@ separated/
 drumless_output/
 server/data/
 
-.gradio/
-
 # android
 android/.gradle/
 android/build/
