@@ -29,7 +29,7 @@ fun ResultsScreen(vm: MainViewModel, state: UiState) {
     val job = state.job ?: run { vm.backToHome(); return }
 
     var bpmText by remember(job.bpm) { mutableStateOf((job.bpm?.roundToInt() ?: 120).toString()) }
-    var gainDb by remember { mutableStateOf(0f) }
+    var gainDb by remember { mutableStateOf(6f) }
 
     val base = remember(state.baseUrl) { state.baseUrl.trimEnd('/') }
     val urlBacking = job.files["backing"]?.let { base + it }
@@ -62,7 +62,7 @@ fun ResultsScreen(vm: MainViewModel, state: UiState) {
         }
 
         Text("Click volume: ${gainDb.roundToInt()} dB", style = MaterialTheme.typography.labelLarge)
-        Slider(value = gainDb, onValueChange = { gainDb = it }, valueRange = -20f..0f)
+        Slider(value = gainDb, onValueChange = { gainDb = it }, valueRange = -20f..6f)
 
         Button(
             onClick = { vm.regen(bpmText.toDoubleOrNull(), gainDb.toDouble()) },
