@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🥁</text></svg>" type="image/svg+xml">
 </head>
 <body class="bg-background font-body">
 
@@ -47,11 +48,10 @@
     <p class="text-sm text-muted-foreground">Drumless — Drum‑removal + Practice Tempo Tool</p>
   </footer>
 
-  <script>
+  <script defer>
     (() => {
       const html = document.documentElement;
       const themeToggle = document.getElementById('theme-toggle');
-      const icon = themeToggle.querySelector('span');
 
       // Check for saved theme or preferred scheme
       const saved = localStorage.getItem('drumless-theme');
@@ -59,14 +59,14 @@
 
       if (saved === 'dark' || (!saved && prefersDark)) {
         html.classList.add('dark');
-        icon.textContent = '☀️';
+        themeToggle.textContent = '☀️';
       }
 
       themeToggle.addEventListener('click', () => {
         html.classList.toggle('dark');
         const isDark = html.classList.contains('dark');
         localStorage.setItem('drumless-theme', isDark ? 'dark' : 'light');
-        icon.textContent = isDark ? '☀️' : '🌙';
+        themeToggle.textContent = isDark ? '☀️' : '🌙';
       });
     })();
   </script>
