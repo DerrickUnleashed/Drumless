@@ -208,7 +208,7 @@ def regen(job_id: str, req: RegenRequest):
     click_new = synthesize_click_track(
         beat_times, sr=SAMPLE_RATE, length=len(backing_audio)
     )
-    gain = req.click_gain_db if req.click_gain_db is not None else 0.0
+    gain = req.click_gain_db if req.click_gain_db is not None else 6.0
     mixed = build_mixed_track(backing_audio, click_new, gain)
 
     tag = f"regen_{int(time.time() * 1000)}"
