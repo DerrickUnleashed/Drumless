@@ -34,8 +34,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
 from drumless.pipeline import process_track
-from drumless.audio_utils import load_audio_as_numpy, save_numpy_as_wav
-from drumless.click_track import synthesize_click_track, build_mixed_track
+from drumless.audio_utils import load_audio_as_numpy, save_numpy_as_wav, wav_to_mp3
+from drumless.click_track import build_beat_times, synthesize_click_track, build_mixed_track
 
 # Job outputs + uploads land here.  Point DATA_DIR at a persistent disk in prod
 # (e.g. Render's mount, /app/data) so results survive restarts.
@@ -64,6 +64,7 @@ class Job:
         self.progress = 0               # 0..6 fraction*100
         self.message = "Queued"
         self.bpm = None
+        self.first_beat = None
         self.tempo_source = None
         self.model = "htdemucs"
         self.files: dict = {}           # {"backing": {"wav": url, "mp3": url}, ...}
@@ -72,6 +73,7 @@ class Job:
 
 
 JOBS: dict[str, Job] = {}
+JOB_LOCK = threading.Lock()
 
 
 def _dir_for(job: Job) -> Path:
@@ -105,6 +107,7 @@ def _run_job(job: Job, uploaded_file: str | None, yt_url: str | None) -> None:
         )
         job.progress = 100
         job.bpm = result["bpm"]
+        job.first_beat = result.get("first_beat", 0.0)
         job.tempo_source = result["tempo_source"]
 
         variants = {
@@ -115,8 +118,10 @@ def _run_job(job: Job, uploaded_file: str | None, yt_url: str | None) -> None:
         job.files = {v: _url_for(job.id, v, "wav") for v in variants}
         job._source_paths = {
             "backing": Path(variants["backing"]["wav"]),
+            "backing_mp3": Path(variants["backing"]["mp3"]),
             "click": Path(result["files"]["click"]["wav"]),
             "mixed": Path(variants["mixed"]["wav"]),
+            "mixed_mp3": Path(variants["mixed"]["mp3"]),
         }
         job.detail_dir = _dir_for(job)
         job.status = "done"
@@ -153,13 +158,14 @@ async def create_job(
 
     # Cloud boxes are RAM-tight (Render Standard = 4GB): a second concurrent
     # Demucs run would OOM the instance, so serialize jobs for now.
-    if any(j.status == "running" for j in JOBS.values()):
-        raise HTTPException(409, "Another job is already processing. Wait for it to finish, then retry.")
+    with JOB_LOCK:
+        if any(j.status in {"queued", "running"} for j in JOBS.values()):
+            raise HTTPException(409, "Another job is already processing. Wait for it to finish, then retry.")
 
-    job_id = f"job_{int(time.time() * 1000)}"
-    job = Job(job_id)
-    job.model = model
-    JOBS[job_id] = job
+        job_id = f"job_{int(time.time() * 1000)}"
+        job = Job(job_id)
+        job.model = model
+        JOBS[job_id] = job
     d = _dir_for(job)
 
     uploaded_path = None
@@ -199,12 +205,8 @@ def regen(job_id: str, req: RegenRequest):
     bpm = req.bpm or (job.bpm or 120.0)
 
     # Rebuild the click grid at the (possibly edited) BPM, then remix.
-    import numpy as np
-    import librosa
     dur_s = len(backing_audio) / SAMPLE_RATE
-    beat_times = librosa.frames_to_time(
-        librosa.util.fix_frames(range(0, int(dur_s * bpm / 60))), sr=SAMPLE_RATE
-    )
+    beat_times = build_beat_times(dur_s, bpm, job.first_beat)
     click_new = synthesize_click_track(
         beat_times, sr=SAMPLE_RATE, length=len(backing_audio)
     )
@@ -216,9 +218,11 @@ def regen(job_id: str, req: RegenRequest):
     mixed_out = d / f"{tag}_mixed.wav"
     save_numpy_as_wav(click_new, click_out, SAMPLE_RATE)
     save_numpy_as_wav(mixed, mixed_out, SAMPLE_RATE)
+    mixed_mp3 = wav_to_mp3(mixed_out, d / f"{tag}_mixed.mp3")
 
     job._source_paths["click"] = click_out
     job._source_paths["mixed"] = mixed_out
+    job._source_paths["mixed_mp3"] = mixed_mp3
     job.files["mixed"] = _url_for(job.id, "mixed", "wav")
     return {"job_id": job_id, "bpm": bpm}
 
@@ -249,12 +253,22 @@ def audio_file(job_id: str, variant: str, fmt: str):
     if job.status != "done":
         raise HTTPException(409, "Job not finished")
 
-    entry = job._source_paths.get(variant)
-    if entry is None:
-        raise HTTPException(404, f"No {variant} output for this job")
+    if fmt not in {"wav", "mp3"}:
+        raise HTTPException(404, f"Unsupported audio format: {fmt}")
 
-    # Serve whichever wav exists for this variant.  `fmt` only shapes the URL.
-    path = entry
+    key = variant if fmt == "wav" else f"{variant}_{fmt}"
+    path = job._source_paths.get(key)
+    if path is None and fmt == "mp3":
+        wav_path = job._source_paths.get(variant)
+        if wav_path is not None and wav_path.exists():
+            path = wav_to_mp3(wav_path, wav_path.with_suffix(".mp3"))
+            job._source_paths[key] = path
+    if path is None:
+        raise HTTPException(404, f"No {fmt} output for {variant}")
+
+    path = Path(path)
     if not path.exists():
         raise HTTPException(404, "Output file missing on disk")
-    return FileResponse(str(path), media_type="audio/wav", filename=f"{variant}.wav")
+
+    media_type = "audio/wav" if fmt == "wav" else "audio/mpeg"
+    return FileResponse(str(path), media_type=media_type, filename=f"{variant}.{fmt}")
