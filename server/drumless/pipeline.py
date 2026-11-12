@@ -29,7 +29,7 @@ from .separation import (
     build_backing_track,
     run_demucs,
 )
-from .tempo import detect_tempo
+from .tempo import detect_tempo, first_beat_time
 
 DEFAULT_CLICK_GAIN_DB = 6.0
 
@@ -121,6 +121,7 @@ def process_track(
         "bpm": bpm,
         "bpm_env": detection["bpm_env"],
         "tempo_source": detection["source"],
+        "first_beat": first_beat_time(detection["beat_times"]),
         "model": model,
         "files": {
             "backing": {"wav": str(backing_only_wav), "mp3": str(backing_only_mp3)},
