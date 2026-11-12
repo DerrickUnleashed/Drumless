@@ -1,7 +1,7 @@
-# Drumless 🥁 — Drum-Removal + Practice Tempo Tool
+<img width="2172" height="724" alt="image" src="https://github.com/user-attachments/assets/79c53604-e543-48d9-a615-13c59f2b97b3" />
 
 Builds a **drum-free backing track** from any song, auto-detects its **tempo (BPM)**,
-and generates a **click track** locked to that tempo — great for focused practice reps.
+and generates a **click track** locked to that tempo - great for focused practice reps.
 
 Two clients, one processing engine:
 
@@ -33,10 +33,10 @@ uvicorn api:app --host 0.0.0.0 --port 8000
 
 ### API
 
-- `POST /api/jobs` — multipart `file` **or** form `url` (YouTube). Returns `{job_id}`.
-- `GET /api/jobs/{id}` — polls status/progress/BPM; `files` maps variants → audio URLs.
-- `POST /api/jobs/{id}/regen` — `{bpm?, click_gain_db?}` re-renders click/mixed.
-- `GET /api/jobs/{id}/audio/{variant}.wav` — streams `backing`/`mixed`.
+- `POST /api/jobs` - multipart `file` **or** form `url` (YouTube). Returns `{job_id}`.
+- `GET /api/jobs/{id}` - polls status/progress/BPM; `files` maps variants → audio URLs.
+- `POST /api/jobs/{id}/regen` - `{bpm?, click_gain_db?}` re-renders click/mixed.
+- `GET /api/jobs/{id}/audio/{variant}.wav` - streams `backing`/`mixed`.
 
 ### Desktop Gradio UI (optional)
 
@@ -48,7 +48,7 @@ python server/app.py    # Gradio at http://127.0.0.1:7860
 
 `server/render.yaml` + `Dockerfile` are included. The service is currently deployed
 on Render's **free tier** at `https://drumless.onrender.com/` (file uploads are the
-dependable path — YouTube blocks datacenter IPs).
+dependable path - YouTube blocks datacenter IPs).
 
 To deploy/update:
 
@@ -59,10 +59,10 @@ To deploy/update:
    `TORCH_HOME=/app/data/torch`.
 3. Verify: `curl https://<name>.onrender.com/api/health` → `{"status":"ok"}`.
 4. In the Android app's **Backend URL** field enter `https://<name>.onrender.com/`
-   — no LAN IP needed. (The backend is HTTPS, which Android requires.)
+   - no LAN IP needed. (The backend is HTTPS, which Android requires.)
 
 **Free tier reality check** (why the config defaults to it today):
-- 512MB RAM: separation can **OOM on long songs** — keep track uploads short.
+- 512MB RAM: separation can **OOM on long songs** - keep track uploads short.
 - No persistent disk: Demucs model weights (~300MB) re-download on every cold
   start (first request after idle can take minutes), and job outputs don't
   survive restarts.
@@ -70,7 +70,7 @@ To deploy/update:
   concurrent Demucs run doesn't blow up the box.
 
 **Upgrade for real use** (`render.yaml` documents this): switch plan to `standard`
-(4GB) and attach a persistent disk at `/app/data` — then weights + outputs persist
+(4GB) and attach a persistent disk at `/app/data` - then weights + outputs persist
 and any reasonably-sized track works.
 
 ---
