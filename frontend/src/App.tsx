@@ -165,6 +165,10 @@ export default function App() {
               }
             }}
           />
+          
+        </div>
+        <div className="column">
+          <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
           <ClickControls
             gainDb={gainDb}
             disabled={!isDone}
@@ -172,10 +176,6 @@ export default function App() {
             onChange={setGainDb}
             onApply={handleApply}
           />
-        </div>
-
-        <div className="column">
-          <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
           <DownloadPanel backing={downloads.backing} mixed={downloads.mixed} />
         </div>
       </div>
