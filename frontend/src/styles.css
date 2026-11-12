@@ -295,6 +295,12 @@ button:disabled {
   font-weight: 700;
 }
 
+.apply-button {
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+}
+
 .audio-panel .audio-player {
   padding: 14px 0;
   border-top: 1px solid var(--border);
