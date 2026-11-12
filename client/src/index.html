@@ -4,7 +4,384 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Drumless — Drum Removal & Practice Tool</title>
-  <link rel="stylesheet" href="input.css">
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 222.2 84% 4.9%;
+      --primary: 221.2 83.2% 53.3%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215 20.2% 65.1%;
+      --accent: 221.2 83.2% 53.3%;
+      --accent-foreground: 210 40% 98%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --radius: 0.5rem;
+    }
+
+    .dark {
+      --background: 222.2 84% 4.9%;
+      --foreground: 210 40% 98%;
+      --card: 222.2 84% 4.9%;
+      --card-foreground: 210 40% 98%;
+      --popover: 222.2 84% 4.9%;
+      --popover-foreground: 210 40% 98%;
+      --primary: 221.2 83.2% 53.3%;
+      --primary-foreground: 222.2 47.4% 11.2%;
+      --secondary: 217.2 32.6% 17.5%;
+      --secondary-foreground: 210 40% 98%;
+      --muted: 215 27.9% 16.9%;
+      --muted-foreground: 215 16.2% 46.9%;
+      --accent: 221.2 83.2% 53.3%;
+      --accent-foreground: 210 40% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 215 27.9% 16.9%;
+      --input: 215 27.9% 16.9%;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      tab-size: 4;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      transition: background 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+    }
+
+    #root {
+      isolation: isolate;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-center: center;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s ease, background-color 0.2s ease;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: var(--secondary-foreground);
+    }
+
+    .btn-secondary:hover {
+      opacity: 0.9;
+    }
+
+    .input {
+      display: block;
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--background);
+      padding: 0.875rem;
+      font-size: 0.875rem;
+      color: var(--foreground);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var-primary-primary;
+    }
+
+    .card {
+      background: var(--card);
+      color: var(--card-foreground);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .section {
+      padding: 3rem 0;
+    }
+
+    .section-header {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      margin-bottom: 2rem;
+      max-width: 24rem;
+    }
+
+    .grid {
+      display: grid;
+    }
+
+    .gap-6 {
+      gap: 1.5rem;
+    }
+
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .max-w-4xl {
+      max-width: 48rem;
+    }
+
+    .mx-auto {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pt-8 {
+      padding-top: 2rem;
+    }
+
+    .pb-6 {
+      padding-bottom: 1.5rem;
+    }
+
+    .mb-8 {
+      margin-bottom: 2rem;
+    }
+
+    .mb-2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .mt-6 {
+      margin-top: 1.5rem;
+    }
+
+    .mt-8 {
+      margin-top: 2rem;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .gap-3 {
+      gap: 0.75rem;
+    }
+
+    .gap-4 {
+      gap: 1rem;
+    }
+
+    .rounded {
+      border-radius: 0.5rem;
+    }
+
+    .rounded-md {
+      border-radius: 0.5rem;
+    }
+
+    .py-12 {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+
+    .text-3xl {
+      font-size: 1.875rem;
+    }
+
+    .text-5xl {
+      font-size: 3rem;
+    }
+
+    .font-bold {
+      font-weight: 700;
+    }
+
+    .font-medium {
+      font-weight: 500;
+    }
+
+    .text-muted-foreground {
+      color: var(--muted-foreground);
+    }
+
+    .text-primary {
+      color: var(--primary);
+    }
+
+    .text-secondary {
+      color: var(--secondary);
+    }
+
+    .bg-primary {
+      background: var(--primary);
+    }
+
+    .bg-secondary {
+      background: var(--secondary);
+    }
+
+    .bg-white\/80 {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .border {
+      border-style: solid;
+    }
+
+    .border-border {
+      border-color: var(--border);
+    }
+
+    .border-2 {
+      border-width: 2px;
+    }
+
+    .p-2 {
+      padding: 0.5rem;
+    }
+
+    .p-2\.5 {
+      padding: 0.625rem;
+    }
+
+    .p-6 {
+      padding: 1.5rem;
+    }
+
+    .shadow-sm {
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .transition-colors {
+      transition: color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .focus-visible\:outline-none &:focus-visible {
+      outline: none;
+    }
+
+    .focus-visible\:ring-2 &:focus-visible {
+      ring-width: 2px;
+    }
+
+    .focus-visible\:ring-ring &:focus-visible {
+      ring-color: var(--primary);
+    }
+
+    .focus-visible\:ring-offset-2 &:focus-visible {
+      ring-offset: 2px;
+    }
+
+    .placeholder\:text-muted-foreground::placeholder {
+      color: var(--muted-foreground);
+    }
+
+    .absolute {
+      position: absolute;
+    }
+
+    .bottom-0 {
+      bottom: 0;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+
+    .w-6 {
+      width: 1.5rem;
+    }
+
+    .h-6 {
+      height: 1.5rem;
+    }
+
+    .h-2 {
+      height: 0.5rem;
+    }
+
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .text-sm {
+      font-size: 0.875rem;
+    }
+
+    .text-primary\/10 {
+      color: rgba(var-primary-rgb, 0.1);
+    }
+
+    .dark\:block {
+      display: block;
+    }
+
+    .dark\:hidden {
+      display: none;
+    }
+
+    .dark\:bg-gray-200 {
+      background-color: #e5e7eb;
+    }
+
+    .dark\:bg-gray-700 {
+      background-color: #3f4251;
+    }
+
+    .dark\:rounded-h {
+      border-radius: 0 0 0.75rem 0.75rem;
+    }
+
+    .cursor-pointer {
+      cursor: pointer;
+    }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
