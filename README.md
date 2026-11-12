@@ -16,7 +16,7 @@ Two clients, one processing engine:
 ## How to run
 
 ```bash
-pip3 install -r requirements.txt
+pip3 install -r server/requirements.txt
 ./run.sh
 ```
 
