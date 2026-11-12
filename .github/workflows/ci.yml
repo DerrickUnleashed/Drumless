@@ -63,10 +63,9 @@ jobs:
           cache: pip
           cache-dependency-path: |
             server/requirements.txt
-            server/requirements-dev.txt
 
       - name: Install dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip install -r server/requirements-dev.txt
 
       - name: Run tests
         run: python -m pytest tests -v
