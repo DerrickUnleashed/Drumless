@@ -40,7 +40,7 @@ export function ClickControls({
       </output>
 
       <button
-        className="button primary"
+        className="button primary apply-button"
         type="button"
         onClick={onApply}
         disabled={disabled || applying}
