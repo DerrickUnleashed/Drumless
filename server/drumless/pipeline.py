@@ -31,7 +31,7 @@ from .separation import (
 )
 from .tempo import detect_tempo
 
-DEFAULT_CLICK_GAIN_DB = -6.0
+DEFAULT_CLICK_GAIN_DB = -4.0
 
 
 class PipelineError(Exception):
