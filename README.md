@@ -60,10 +60,13 @@ Production build:
 cd frontend && npm run build
 ```
 
-The web UI mirrors the Android flow: upload a file or paste a YouTube URL,
-watch progress, play both tracks, download WAV or MP3, and re-render the click
-at an edited BPM. Regen keeps the detected first-beat phase and covers the full
-track.
+The web UI has a landing page at `/` and the studio at `/studio`. The studio
+mirrors the Android flow: upload a file or paste a YouTube URL, watch progress,
+play both tracks, download WAV or MP3, and re-render the click at an edited BPM.
+Regen keeps the detected first-beat phase and covers the full track.
+
+Routing is client-side, so any static host must rewrite unknown paths to
+`index.html` (the Vite dev server and `vite preview` already do this).
 
 ### Deploy (Render)
 
