@@ -21,8 +21,10 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-# Start static frontend server in background
+# Change to client dir for frontend server
 cd "$CLIENT_DIR"
+
+# Start static frontend server in background
 python3 -m http.server 3000 &
 FRONTEND_PID=$!
 
@@ -33,6 +35,9 @@ for i in $(seq 1 10); do
   fi
   sleep 1
 done
+
+# Change back to server dir for Gradio UI
+cd "$SERVER_DIR"
 
 # Start Gradio desktop UI in foreground (blocks)
 python app.py
