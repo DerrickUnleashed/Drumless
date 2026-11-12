@@ -17,8 +17,22 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
+# Start static frontend server in background
+cd "../client/src"
+python3 -m http.server 3000 &
+FRONTEND_PID=$!
+
+# Wait for frontend to be ready
+for i in $(seq 1 10); do
+  if curl -s http://localhost:3000 > /dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
 # Start Gradio desktop UI in foreground (blocks)
 python app.py
 
-# On exit, kill backend
+# On exit, kill both processes
 kill "$BACKEND_PID" 2>/dev/null || true
+kill "$FRONTEND_PID" 2>/dev/null || true
