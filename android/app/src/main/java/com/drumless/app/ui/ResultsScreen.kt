@@ -29,7 +29,7 @@ fun ResultsScreen(vm: MainViewModel, state: UiState) {
     val job = state.job ?: run { vm.backToHome(); return }
 
     var bpmText by remember(job.bpm) { mutableStateOf((job.bpm?.roundToInt() ?: 120).toString()) }
-    var gainDb by remember { mutableStateOf(-4f) }
+    var gainDb by remember { mutableStateOf(0f) }
 
     val base = remember(state.baseUrl) { state.baseUrl.trimEnd('/') }
     val urlBacking = job.files["backing"]?.let { base + it }
