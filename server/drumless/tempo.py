@@ -26,6 +26,11 @@ START_BPM = 120.0    # beats-per-minute prior used by librosa.beat.beat_track
 SILENCE_THRESHOLD = 1e-4   # RMS below this -> treat drums stem as near-silent (RMS handled below)
 
 
+def first_beat_time(beat_times: np.ndarray) -> float:
+    """Return the first beat timestamp, or 0.0 when no beats were detected."""
+    return float(beat_times[0]) if len(beat_times) else 0.0
+
+
 def _rms(audio: np.ndarray) -> float:
     """Overall RMS of a (possibly stereo) audio array."""
     mono = np.mean(audio, axis=-1) if audio.ndim > 1 else audio
