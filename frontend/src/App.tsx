@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { audioUrl, createJob, regenJob } from "./api";
+import { Link } from "./Link";
 import { AudioPanel } from "./components/AudioPanel";
 import { BpmControls } from "./components/BpmControls";
 import { ClickControls } from "./components/ClickControls";
@@ -112,6 +113,27 @@ export default function App() {
 
   return (
     <main className="app">
+      <nav className="studio-nav" aria-label="Breadcrumb">
+        <Link to="/" className="back-link">
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
+          Home
+        </Link>
+        <span className="studio-nav-title">Studio</span>
+      </nav>
+
       <header className="hero">
         <p className="eyebrow">Practice tool</p>
         <h1>Drumless</h1>
