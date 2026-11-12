@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drumless — Drum Removal & Practice Tool</title>
+  <link rel="stylesheet" href="input.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background font-body">
+
+  <header class="header">
+    <div>
+      <h1 class="text-4xl font-bold tracking-tight">Drumless</h1>
+      <p class="text-muted-foreground">Drum‑removal + practice tempo tool</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle dark mode">🌙</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="section-header">Remove drums from any track</h2>
+      <p class="section-desc">Upload a YouTube URL or audio file and get a drum‑free backing track with auto‑detected BPM.</p>
+
+      <div class="grid gap-6 md:grid-cols-2 mt-8">
+        <div>
+          <h3 class="font-medium mb-2">YouTube URL</h3>
+          <p class="text-muted-foreground">Paste a public link — no account needed</p>
+          <input id="url-input" type="text" placeholder="https://www.youtube.com/watch?v=" class="input w-full mt-2" />
+        </div>
+        <div>
+          <h3 class="font-medium mb-2">Or upload file</h3>
+          <p class="text-muted-foreground">mp3, wav, m4a, flac, aac, ogg, opus</p>
+          <input id="file-input" type="file" class="input w-full mt-2" accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.opus,.webm" />
+        </div>
+      </div>
+
+      <button id="process-btn" class="btn btn-primary w-full mt-6">Process Track</button>
+    </div>
+  </main>
+
+  <footer class="section bg-gray-50 dark:bg-gray-900 py-8 text-center">
+    <p class="text-sm text-muted-foreground">Drumless — Drum‑removal + Practice Tempo Tool</p>
+  </footer>
+
+  <script>
+    (() => {
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle');
+      const icon = themeToggle.querySelector('span');
+
+      // Check for saved theme or preferred scheme
+      const saved = localStorage.getItem('drumless-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        html.classList.add('dark');
+        icon.textContent = '☀️';
+      }
+
+      themeToggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        const isDark = html.classList.contains('dark');
+        localStorage.setItem('drumless-theme', isDark ? 'dark' : 'light');
+        icon.textContent = isDark ? '☀️' : '🌙';
+      });
+    })();
+  </script>
+
+</body>
+</html>
