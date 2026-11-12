@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drumless — Dashboard</title>
+  <link rel="stylesheet" href="input.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background font-body">
+
+  <header class="header">
+    <div>
+      <h1 class="text-4xl font-bold tracking-tight">Drumless</h1>
+      <p class="text-muted-foreground">Drum‑removal + practice tempo tool</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle dark mode">🌙</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="max-w-2xl mx-auto">
+      <!-- Status card -->
+      <div id="status-card" class="card mb-8 hidden">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4l2 8h4l2 -8h-4l-2 8h-2l-2 -8H9l2 -8H5z"/>
+            </svg>
+          </div>
+          <div>
+            <p id="status-text" class="font-medium">Ready</p>
+            <p id="stage-text" class="text-xs text-muted-foreground">Upload a track to get started</p>
+          </div>
+        </div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-h full" aria-label="Progress bar">
+          <div id="progress-bar" class="h-2 rounded-lg bg-primary transition-width" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Results card -->
+      <div id="results-card" class="card grid grid-cols-1 gap-6 md:grid-cols-2 hidden">
+        <div>
+          <h2 class="font-medium mb-3">Detected BPM</h2>
+          <p id="bpm-value" class="text-5xl font-bold">120</p>
+          <p id="bpm-info" class="text-muted-foreground">(source: auto, env: 120)</p>
+        </div>
+        <div>
+          <h2 class="font-medium mb-3">Tempo Source</h2>
+          <p id="tempo-source" class="text-muted-foreground">Auto-detected</p>
+        </div>
+      </div>
+
+      <!-- Audio players -->
+      <div class="grid gap-6 md:grid-cols-2 mt-8">
+        <div>
+          <h3 class="font-medium mb-3">Backing + Click</h3>
+          <div class="relative">
+            <audio id="mixed-player" controls preload="metadata" class="w-full"></audio>
+            <button id="download-mixed" download class="abs-bottom btn btn-secondary text-sm">Download MP3</button>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-medium mb-3">Backing Only</h3>
+          <div class="relative">
+            <audio id="backing-player" controls preload="metadata" class="w-full"></audio>
+            <button id="download-backing" download class="abs-bottom btn btn-secondary text-sm">Download MP3</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BPM controls -->
+      <div class="mt-8 pt-8 border-t">
+        <h2 class="font-medium mb-3">Adjust BPM</h2>
+        <div class="grid gap-3 mb-4">
+          <button id="half-btn" class="btn btn-secondary">÷2</button>
+          <button id="dbl-btn" class="btn btn-secondary">×2</button>
+        </div>
+        <div>
+          <label class="text-sm font-medium">BPM: <span id="editable-bpm" class="font-mono">120</span></label>
+          <input id="bpm-input" type="number" min="40" max="300" value="120" class="input w-full mt-2" />
+        </div>
+      </div>
+
+      <!-- Click volume -->
+      <div class="mt-6">
+        <h2 class="font-medium mb-3">Click Volume</h2>
+        <input id="click-gain" type="range" min="-20" max="0" value="-6" class="input w-full mt-2" />
+        <p id="click-gain-value" class="text-sm text-muted-foreground mt-1">-6 dB</p>
+      </div>
+
+      <!-- Download buttons -->
+      <div class="mt-8 pt-8 border-t">
+        <button id="download-mixed-wav" download class="btn btn-primary w-full mb-2">Download Mixed (WAV)</button>
+        <button id="download-backing-wav" download class="btn btn-secondary w-full">Download Backing (WAV)</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle');
+      const icon = themeToggle.querySelector('span');
+
+      // Check for saved theme or preferred scheme
+      const saved = localStorage.getItem('drumless-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        html.classList.add('dark');
+        icon.textContent = '☀️';
+      }
+
+      themeToggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        const isDark = html.classList.contains('dark');
+        localStorage.setItem('drumless-theme', isDark ? 'dark' : 'light');
+        icon.textContent = isDark ? '☀️' : '🌙';
+      });
+
+      // Dashboard state
+      let jobId = null;
+      let bpm = 120;
+
+      // Initialize audio players
+      const mixedPlayer = document.getElementById('mixed-player');
+      const backingPlayer = document.getElementById('backing-player');
+
+      mixedPlayer.addEventListener('loadeddata', () => {
+        mixedPlayer.controls = true;
+      });
+
+      backingPlayer.addEventListener('loadeddata', () => {
+        backingPlayer.controls = true;
+      });
+
+      // BPM control
+      const editableBpm = document.getElementById('editable-bpm');
+      const bpmInput = document.getElementById('bpm-input');
+
+      function updateBPM(value) {
+        bpm = Math.max(40, Math.min(300, Math.round(value)));
+        editableBpm.textContent = bpm;
+        bpmInput.value = bpm;
+      }
+
+      document.getElementById('half-btn').addEventListener('click', () => {
+        updateBPM(Math.max(40, bpm / 2));
+      });
+
+      document.getElementById('dbl-btn').addEventListener('click', () => {
+        updateBPM(Math.min(300, bpm * 2));
+      });
+
+      bpmInput.addEventListener('input', (e) => {
+        updateBPM(parseFloat(e.target.value) || 120);
+      });
+
+      // Click volume
+      const clickGainInput = document.getElementById('click-gain');
+      const clickGainValue = document.getElementById('click-gain-value');
+
+      clickGainInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        clickGainValue.textContent = `${val} dB`;
+      });
+
+      // Simulate job status and results
+      function showStatus(isRunning) {
+        const statusCard = document.getElementById('status-card');
+        const resultsCard = document.getElementById('results-card');
+
+        if (isRunning) {
+          statusCard.classList.remove('hidden');
+          resultsCard.classList.add('hidden');
+        } else {
+          statusCard.classList.add('hidden');
+          resultsCard.classList.remove('hidden');
+        }
+      }
+
+      // Mock API calls - in production these would hit the FastAPI backend
+      async function simulateProcess() {
+        showStatus(true);
+
+        // Simulate progress
+        const progressBar = document.getElementById('progress-bar');
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 15;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+          }
+          progressBar.style.width = `${progress}%`;
+        }, 300);
+
+        // Simulate completion
+        await new Promise(resolve => setTimeout(resolve, 2500));
+
+        // Show results
+        clearInterval(interval);
+        progressBar.style.width = '100%';
+
+        const bpmResult = Math.round(Math.random() * (180 - 60) + 60);
+        updateBPM(bpmResult);
+
+        document.getElementById('bpm-info').textContent = `(source: auto, env: ${bpmResult})`;
+        document.getElementById('tempo-source').textContent = 'Auto-detected';
+
+        // Set audio URLs (mock)
+        mixedPlayer.src = '/api/jobs/mock/audio/mixed.wav';
+        backingPlayer.src = '/api/jobs/mock/audio/backing.wav';
+
+        document.getElementById('download-mixed').onclick = () => window.open('/api/jobs/mock/audio/mixed.mp3', '_blank');
+        document.getElementById('download-backing').onclick = () => window.open('/api/jobs/mock/audio/backing.mp3', '_blank');
+        document.getElementById('download-mixed-wav').onclick = () => window.open('/api/jobs/mock/audio/mixed.wav', '_blank');
+        document.getElementById('download-backing-wav').onclick = () => window.open('/api/jobs/mock/audio/backing.wav', '_blank');
+
+        showStatus(false);
+      }
+
+      // Process button
+      document.getElementById('process-btn').addEventListener('click', () => {
+        const url = document.getElementById('url-input').value;
+        const file = document.getElementById('file-input').files[0];
+
+        if (!url && !file) {
+          alert('Please provide a YouTube URL or upload a file');
+          return;
+        }
+
+        simulateProcess();
+      });
+
+      // Initial state
+      showStatus(false);
+    })();
+  </script>
+
+</body>
+</html>
