@@ -9,7 +9,7 @@ Two clients, one processing engine:
 | --- | --- | --- |
 | **Android app** | Kotlin + Jetpack Compose | `android/` |
 | **API backend** | FastAPI wrapping the Python pipeline | `server/` |
-| **Desktop UI** (optional) | Gradio | `server/app.py` |
+| **Web UI** | React + TypeScript + Vite | `frontend/` |
 
 The phone can't run Demucs, so the Android app is a thin client: it uploads a file
 (or sends a YouTube URL) to the backend, polls for progress, and plays/downloads the
@@ -36,13 +36,34 @@ uvicorn api:app --host 0.0.0.0 --port 8000
 - `POST /api/jobs` - multipart `file` **or** form `url` (YouTube). Returns `{job_id}`.
 - `GET /api/jobs/{id}` - polls status/progress/BPM; `files` maps variants → audio URLs.
 - `POST /api/jobs/{id}/regen` - `{bpm?, click_gain_db?}` re-renders click/mixed.
-- `GET /api/jobs/{id}/audio/{variant}.wav` - streams `backing`/`mixed`.
+- `GET /api/jobs/{id}/audio/{variant}.{wav,mp3}` - streams `backing`/`mixed`.
 
-### Desktop Gradio UI (optional)
+### Web UI (React + Vite)
 
 ```bash
-python server/app.py    # Gradio at http://127.0.0.1:7860
+# Terminal 1 - backend
+cd server && uvicorn api:app --host 0.0.0.0 --port 8000
+
+# Terminal 2 - frontend
+cd frontend && npm install && npm run dev   # http://localhost:5173
 ```
+
+Or run both with the shortcut:
+
+```bash
+./run.sh
+```
+
+Production build:
+
+```bash
+cd frontend && npm run build
+```
+
+The web UI mirrors the Android flow: upload a file or paste a YouTube URL,
+watch progress, play both tracks, download WAV or MP3, and re-render the click
+at an edited BPM. Regen keeps the detected first-beat phase and covers the full
+track.
 
 ### Deploy (Render)
 
@@ -109,9 +130,9 @@ android/app/src/main/java/com/drumless/app/
 
 ```
 android/                Kotlin/Compose mobile app (Android Studio project)
+frontend/               React + TypeScript + Vite web UI
 server/
   api.py                FastAPI backend (job API + background worker thread)
-  app.py                Optional Gradio desktop UI
   drumless/
     input_handler.py    yt-dlp URL download / file validation → 44.1kHz WAV
     separation.py       Demucs stems + backing build (bass+vocals+other)
