@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -88,7 +92,7 @@
   }
 
   .input {
-    @apply block w-full rounded-md border border-border bg-background 
+    @apply block w-full rounded-md border border-background bg-background 
            p-2.5 text-sm shadow-sm transition-colors 
            placeholder:text-muted-foreground 
            focus-visible:outline-none focus-visible:ring-2 
