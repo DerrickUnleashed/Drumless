@@ -122,28 +122,3 @@ server/
   Dockerfile            containerized backend
   render.yaml           Render blueprint (Standard + persistent disk)
 ```
-
-### Tweaking
-
-- **Model choice:** `htdemucs` (fast) vs `htdemucs_ft` (better, ~4× slower) — swap
-  the model argument in the job POST (`model` form field) or edit
-  `drumless/separation.py::run_demucs`.
-- **Beat detection:** `START_BPM` and other knobs in `tempo.py::detect_tempo`; it
-  prefers the drums stem and falls back to the full mix when drums are near-silent.
-
----
-
-## Known limitations
-
-- **Separation artifacts.** Demucs isn't perfect: bright mixes bleed cymbals into
-  "other"; bass-heavy tracks bleed bass into "drums". Model-quality ceiling, not a bug.
-- **yt-dlp fragility.** YouTube actively fights downloaders. The upload path always works.
-- **Speed-only CPU.** No GPU required, but one speeds separation up dramatically.
-- **Max input length.** 10 minutes, to keep CPU processing sane.
-- **Downbeat accenting** (louder beat-1 clicks) not implemented — needs a reliable
-  time-signature estimate.
-- **Cloud deployment**: single-process in-memory job store. For many concurrent users,
-  move to a Redis queue + background workers and S3/R2 for outputs (the API contract
-  is queue-agnostic).
-- **Personal use only.** For tracks you own or have rights to. Downloading YouTube
-  audio can run against YouTube's ToS — keep it personal, not redistributed.
