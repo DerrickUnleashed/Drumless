@@ -18,3 +18,5 @@ android/.kotlin/
 captures/
 .externalNativeBuild/
 .cxx/
+
+commit.sh
