@@ -16,6 +16,17 @@ import numpy as np
 from .audio_utils import save_numpy_as_wav, apply_gain_db, load_audio_as_numpy
 
 
+def build_beat_times(
+    duration_s: float,
+    bpm: float,
+    first_beat: float | None = None,
+) -> np.ndarray:
+    """Return beat timestamps covering the full duration, preserving phase."""
+    period = 60.0 / bpm
+    phase = (first_beat or 0.0) % period
+    return np.arange(phase, duration_s, period)
+
+
 def synthesize_click_track(
     beat_times: np.ndarray,
     sr: int,
