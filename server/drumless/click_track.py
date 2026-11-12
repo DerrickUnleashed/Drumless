@@ -1,7 +1,7 @@
 """Click / metronome track synthesis via librosa.clicks.
 
 Synthesize a metronome aligned to detected beats, at an adjustable gain
-relative to the backing mix (default 0dB, so the click plays at full level).
+relative to the backing mix (default +6dB, so the click plays above the music).
 
 Stretch (not MVP): accenting downbeats louder requires a time-signature /
 downbeat guess, which is meaningfully harder.  Left as later polish.
