@@ -70,6 +70,243 @@ h1 {
   border-radius: var(--radius);
   background: var(--panel);
   box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.panel h2 {
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+input[type="text"],
+input[type="url"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--text);
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--muted);
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+input:disabled,
+select:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.upload-form label:not(:first-of-type) {
+  margin-top: 14px;
+}
+
+.hint {
+  margin: 6px 0 16px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.hint.precedence {
+  color: var(--accent);
+}
+
+.form-error {
+  margin: 0 0 14px;
+  color: var(--danger);
+  font-size: 0.88rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.05s ease;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button.primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: #1a1205;
+  font-weight: 700;
+}
+
+.button.subtle {
+  background: transparent;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 122, 122, 0.5);
+  border-radius: 12px;
+  background: rgba(255, 122, 122, 0.12);
+  color: var(--danger);
+}
+
+.error-banner p {
+  margin: 0;
+}
+
+.progress-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stage {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.progress-track {
+  height: 10px;
+  margin: 14px 0 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--panel-strong);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  transition: width 0.3s ease;
+}
+
+.progress-message {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.detected-tempo {
+  margin: 0 0 16px;
+  color: var(--success);
+  font-size: 0.9rem;
+}
+
+.gain-readout {
+  display: inline-block;
+  margin: 8px 0 18px;
+  color: var(--accent-strong);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.audio-panel .audio-player {
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.audio-panel .audio-player:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.audio-player h3 {
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.audio-player audio {
+  width: 100%;
+}
+
+.download-links {
+  display: grid;
+  gap: 10px;
+}
+
+.download-links a {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.download-links a:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
