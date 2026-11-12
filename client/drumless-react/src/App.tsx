@@ -187,11 +187,11 @@ const DashboardPage: React.FC = () => {
               id="click-gain"
               type="range"
               min="-20"
-              max="0"
-              value="0"
+              max="6"
+              value="6"
               className="input w-full mt-2"
             />
-            <p id="click-gain-value" className="text-sm text-muted-foreground mt-1">0 dB</p>
+            <p id="click-gain-value" className="text-sm text-muted-foreground mt-1">6 dB</p>
           </div>
 
           <div className="mt-8 pt-8 border-t">
