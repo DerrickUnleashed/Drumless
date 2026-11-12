@@ -1,7 +1,7 @@
 fastapi>=0.110.0
 uvicorn[standard]>=0.54.0
 python-multipart>=0.0.9
-yt-dlp>=2024.1.0
+yt-dlp>=2026.10.26
 demucs>=4.0.0
 librosa>=1.0.0
 pydub>=0.25.1
