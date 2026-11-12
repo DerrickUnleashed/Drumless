@@ -3,45 +3,36 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_DIR="$PROJECT_DIR/server"
-CLIENT_DIR="$PROJECT_DIR/client/src"
+FRONTEND_DIR="$PROJECT_DIR/frontend"
+BACKEND_PORT=8000
+FRONTEND_PORT=5173
 
-cd "$SERVER_DIR"
+cleanup() {
+  kill "${BACKEND_PID:-}" 2>/dev/null || true
+}
 
-killport 8000 2>/dev/null || true
+trap cleanup EXIT INT TERM
+
+killport "$BACKEND_PORT" 2>/dev/null || true
+killport "$FRONTEND_PORT" 2>/dev/null || true
 
 # Start FastAPI backend in background
-uvicorn api:app --host 0.0.0.0 --port 8000 &
+cd "$SERVER_DIR"
+uvicorn api:app --host 0.0.0.0 --port "$BACKEND_PORT" &
 BACKEND_PID=$!
 
 # Wait for backend to be ready
-for i in $(seq 1 30); do
-  if curl -s http://localhost:8000/api/health > /dev/null 2>&1; then
+for _ in $(seq 1 30); do
+  if curl -s "http://localhost:$BACKEND_PORT/api/health" > /dev/null 2>&1; then
     break
   fi
   sleep 1
 done
 
-# Change to client dir for frontend server
-cd "$CLIENT_DIR"
+# Start the React frontend (Vite dev server, foreground)
+cd "$FRONTEND_DIR"
+if [ ! -d node_modules ]; then
+  npm install
+fi
 
-# Start static frontend server in background
-python3 -m http.server 3000 &
-FRONTEND_PID=$!
-
-# Wait for frontend to be ready
-for i in $(seq 1 10); do
-  if curl -s http://localhost:3000 > /dev/null 2>&1; then
-    break
-  fi
-  sleep 1
-done
-
-# Change back to server dir for Gradio UI
-cd "$SERVER_DIR"
-
-# Start Gradio desktop UI in foreground (blocks)
-python app.py
-
-# On exit, kill all background processes
-kill "$BACKEND_PID" 2>/dev/null || true
-kill "$FRONTEND_PID" 2>/dev/null || true
+npm run dev
