@@ -1,4 +1,4 @@
-# Drumless backend — FastAPI + demo pipeline.
+# Drumless backend - FastAPI + demo pipeline.
 # NOTE: keep this service on a CPU+RAM tier sized for Demucs (>= 4GB RAM,
 # persistent disk for model cache + outputs).
 FROM python:3.12-slim
