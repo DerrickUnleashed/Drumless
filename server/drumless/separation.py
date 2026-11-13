@@ -2,7 +2,7 @@
 
 Runs `demucs` as a subprocess on the canonical input WAV, producing four
 stems: drums, bass, vocals, other.  The backing track is the SUM of
-bass + vocals + other (we never just discard the drums track — we remix
+bass + vocals + other (we never just discard the drums track - we remix
 the remaining three).
 
 Model choice is configurable:
@@ -46,7 +46,7 @@ def run_demucs(
     """Run Demucs on input_wav and return the folder containing the four stems
     (drums/bass/vocals/other .wav files).
 
-    Each job is isolated under separated/<job_id>/ — demucs writes stems to
+    Each job is isolated under separated/<job_id>/ - demucs writes stems to
     <out>/<model>/<trackname>/ inside that root, where <trackname> is derived
     from the input filename (sanitized), so we locate it by searching.
     """
@@ -105,7 +105,7 @@ def run_demucs(
 def build_backing_track(stem_dir: Path, out_path: Path, sr: int = 44100) -> Path:
     """Sum bass + vocals + other into a single backing (drum-free) track.
 
-    We mix the three stems rather than merely deleting the drums — this
+    We mix the three stems rather than merely deleting the drums - this
     preserves the full musical content minus percussion.
     """
     loaded = {}
