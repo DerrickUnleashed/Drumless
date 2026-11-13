@@ -4,7 +4,9 @@ import type {
   CreateJobInput,
   JobStatus,
   RegenInput,
+  TrackSummary,
 } from "./types";
+import { getAccessToken } from "./lib/supabase";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -17,7 +19,16 @@ export class ApiError extends Error {
 }
 
 export function apiUrl(path: string): string {
-  return `${import.meta.env.VITE_API_BASE ?? ""}${path}`;
+  const base =
+    import.meta.env.VITE_API_BASE ??
+    import.meta.env.VITE_API_BASE_URL ??
+    "";
+  return `${base}${path}`;
+}
+
+function authHeaders(): Record<string, string> {
+  const token = getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 async function errorFrom(response: Response): Promise<ApiError> {
@@ -46,7 +57,11 @@ export async function createJob(input: CreateJobInput): Promise<string> {
   }
   body.append("model", input.model);
 
-  const response = await fetch(apiUrl("/api/jobs"), { method: "POST", body });
+  const response = await fetch(apiUrl("/api/jobs"), {
+    method: "POST",
+    headers: authHeaders(),
+    body,
+  });
   if (!response.ok) {
     throw await errorFrom(response);
   }
@@ -56,7 +71,10 @@ export async function createJob(input: CreateJobInput): Promise<string> {
 }
 
 export async function getJob(jobId: string): Promise<JobStatus> {
-  const response = await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`));
+  const headers = authHeaders();
+  const response = Object.keys(headers).length
+    ? await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`), { headers })
+    : await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`));
   if (!response.ok) {
     throw await errorFrom(response);
   }
@@ -79,7 +97,7 @@ export async function regenJob(
     apiUrl(`/api/jobs/${encodeURIComponent(jobId)}/regen`),
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify(body),
     },
   );
@@ -96,4 +114,57 @@ export function audioUrl(
 ): string {
   const path = `/api/jobs/${encodeURIComponent(jobId)}/audio/${variant}.${format}`;
   return version === undefined ? apiUrl(path) : apiUrl(`${path}?v=${encodeURIComponent(String(version))}`);
+}
+
+async function authedFetch(path: string, init?: RequestInit): Promise<Response> {
+  const headers = { ...authHeaders(), ...(init?.headers ?? {}) };
+  const response = await fetch(apiUrl(path), { ...init, headers });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+  return response;
+}
+
+export async function listTracks(): Promise<TrackSummary[]> {
+  const response = await authedFetch("/api/tracks");
+  const data = (await response.json()) as { tracks: TrackSummary[] };
+  return data.tracks;
+}
+
+export async function renameTrack(
+  trackId: string,
+  customName: string,
+): Promise<TrackSummary> {
+  const response = await authedFetch(
+    `/api/tracks/${encodeURIComponent(trackId)}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ custom_name: customName }),
+    },
+  );
+  return (await response.json()) as TrackSummary;
+}
+
+export async function deleteTrack(trackId: string): Promise<void> {
+  await authedFetch(`/api/tracks/${encodeURIComponent(trackId)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function trackUrl(
+  trackId: string,
+  variant: AudioVariant | "original",
+  format: AudioFormat,
+  download = false,
+): Promise<string> {
+  const params = new URLSearchParams({ variant, format });
+  if (download) {
+    params.set("download", "true");
+  }
+  const response = await authedFetch(
+    `/api/tracks/${encodeURIComponent(trackId)}/url?${params.toString()}`,
+  );
+  const data = (await response.json()) as { url: string };
+  return data.url;
 }
