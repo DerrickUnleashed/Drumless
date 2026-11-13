@@ -35,6 +35,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -307,7 +309,19 @@ def _run_track_job(
 # App
 # ---------------------------------------------------------------------------
 
-app = FastAPI(title="Drumless API", version="2.0.0")
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Mark tracks abandoned by a previous container as failed."""
+    client = get_client()
+    if client is not None:
+        try:
+            client.mark_stale_tracks()
+        except Exception:  # noqa: BLE001 — startup must never crash on this
+            pass
+    yield
+
+
+app = FastAPI(title="Drumless API", version="2.0.0", lifespan=lifespan)
 
 # Mobile apps don't send Origin by default (file:// / native), but allow CORS so
 # the same backend can serve a web client.
@@ -516,6 +530,15 @@ def job_status(job_id: str, request: Request):
     row = client.get_track(job_id, user["id"])
     if row is None:
         raise HTTPException(404, "Unknown job")
+    if row["status"] in {"queued", "running"} and job_id not in JOBS:
+        updated = client.update_track(
+            job_id,
+            {
+                "status": "error",
+                "error_message": "Processing was interrupted. Please retry.",
+            },
+        )
+        row = updated or row
     payload = _row_to_payload(row, client)
     return {
         "job_id": row["id"],
