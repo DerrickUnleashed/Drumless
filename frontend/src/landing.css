@@ -27,10 +27,7 @@
       transparent 30%,
       rgba(13, 15, 20, 0.55) 100%
     ),
-    image-set(
-      url("/bg.avif") type("image/avif"),
-      url("/bg.webp") type("image/webp")
-    );
+    url("/bg.png");
   background-size: cover, cover, cover;
   background-position: center, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat;
@@ -50,10 +47,7 @@
         transparent 30%,
         rgba(13, 15, 20, 0.55) 100%
       ),
-      image-set(
-        url("/bg-960.webp") type("image/webp"),
-        url("/bg.png") type("image/png")
-      );
+      url("/bg.png");
   }
 }
 
