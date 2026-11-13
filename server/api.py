@@ -59,6 +59,10 @@ SAMPLE_RATE = 44100
 SIGNED_URL_TTL = int(os.environ.get("SIGNED_URL_TTL", "3600"))
 DEFAULT_CLICK_GAIN_DB = 6.0
 
+# Render Free has 512 MB; htdemucs peaks ~900 MB and gets OOM-killed. Set
+# DEMUCS_MODEL=mdx_q there (quantized, ~370 MB). Local runs keep the default.
+_MODEL_OVERRIDE = os.environ.get("DEMUCS_MODEL")
+
 # Map the pipeline's stage strings ("(1/6) Preparing input audio…") to a compact
 # stage label + progress fraction, so the app can render a bar + text.
 _STAGES = ["input", "separation", "backing", "tempo", "click", "export"]
@@ -347,6 +351,9 @@ async def create_job(
 ):
     if not file and not url:
         raise HTTPException(400, "Provide an audio `file` upload OR a YouTube `url`.")
+
+    if _MODEL_OVERRIDE:
+        model = _MODEL_OVERRIDE
 
     client = get_client()
     user = _optional_user(request, client)
