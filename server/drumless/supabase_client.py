@@ -114,6 +114,19 @@ class SupabaseRest:
         )
         self._raise(response)
 
+    def mark_stale_tracks(self) -> None:
+        """Fail tracks left mid-flight by a restart/crash (no worker anymore)."""
+        response = self._client.patch(
+            f"{self.url}/rest/v1/tracks",
+            params={"status": "in.(queued,running)"},
+            headers=self._db_headers,
+            json={
+                "status": "error",
+                "error_message": "Processing was interrupted by a server restart. Please retry.",
+            },
+        )
+        self._raise(response)
+
     # -- Storage ------------------------------------------------------------
     @property
     def _storage_headers(self) -> dict[str, str]:
