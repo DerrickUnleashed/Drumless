@@ -4,6 +4,7 @@
 
 .landing {
   position: relative;
+  display: flow-root;
   width: 100%;
   overflow-x: clip;
 }
@@ -520,5 +521,3 @@
     transition: none;
   }
 }
-
-.landing::before{display:none!important}
