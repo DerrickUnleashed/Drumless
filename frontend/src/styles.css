@@ -472,3 +472,12 @@ button:disabled {
   font-size: 0.72rem;
   padding: 4px 8px;
 }
+
+.hero-logo {
+  display: block;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  object-fit: contain;
+  border-radius: 12px;
+}
