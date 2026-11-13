@@ -30,3 +30,13 @@ services:
       # disk at /app/data they survive restarts instead of being re-downloaded.
       - key: TORCH_HOME
         value: /app/data/torch
+      # Supabase project (URL is public; keys are secrets set in the dashboard
+      # or via `render env set`). The service-role key must never reach clients.
+      - key: SUPABASE_URL
+        value: https://iabprzyslorlzxajhlmf.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SIGNED_URL_TTL
+        value: "3600"
