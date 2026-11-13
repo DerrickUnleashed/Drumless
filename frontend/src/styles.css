@@ -136,6 +136,8 @@ label {
 input[type="text"],
 input[type="url"],
 input[type="number"],
+input[type="email"],
+input[type="password"],
 select {
   width: 100%;
   padding: 10px 12px;
@@ -351,4 +353,122 @@ button:disabled {
     width: min(100% - 20px, 1080px);
     padding-top: 32px;
   }
+}
+
+/* Auth + track library */
+.auth-screen {
+  width: min(560px, calc(100% - 32px));
+}
+
+.auth-screen .upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-screen .upload-form .button {
+  align-self: flex-start;
+}
+
+.studio-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.studio-account-email {
+  color: var(--muted);
+  font-size: 0.82rem;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-nav .studio-nav-title {
+  margin: 0 auto;
+}
+
+.track-library-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.track-library-head h2 {
+  margin: 0;
+}
+
+.track-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.track-item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  overflow: hidden;
+}
+
+.track-item.selected {
+  border-color: var(--accent);
+}
+
+.track-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.track-open:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.track-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.track-meta {
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.track-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-left: 1px solid var(--border);
+}
+
+.track-actions .button {
+  font-size: 0.72rem;
+  padding: 4px 8px;
 }
