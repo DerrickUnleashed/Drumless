@@ -1,4 +1,4 @@
-import type { ReactNode, SVGProps } from "react";
+import type { CSSProperties, ReactNode, SVGProps } from "react";
 import { Link } from "./Link";
 import "./styles.css";
 import "./landing.css";
@@ -192,7 +192,12 @@ export function Landing() {
                   <span
                     key={index}
                     className="waveform-bar"
-                    style={{ height: `${height}%` }}
+                    style={
+                      {
+                        height: `${height}%`,
+                        "--hover-scale": Math.min(1.6, 100 / height).toFixed(2),
+                      } as CSSProperties
+                    }
                   />
                 ))}
               </div>
