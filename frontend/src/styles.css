@@ -528,3 +528,58 @@ button:disabled {
   object-fit: contain;
   border-radius: 12px;
 }
+
+/* Glass: refraction layer + specular sheen */
+.panel::before,
+.panel::after,
+.track-item::before,
+.track-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.panel::before,
+.track-item::before {
+  -webkit-backdrop-filter: url(#glass-refraction);
+  backdrop-filter: url(#glass-refraction);
+  opacity: 0.8;
+  background: transparent;
+}
+
+.panel::after,
+.track-item::after {
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.05) 18%,
+    transparent 44%,
+    transparent 72%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  opacity: 0.75;
+  mix-blend-mode: screen;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .panel,
+  .track-item {
+    background: rgba(21, 25, 34, 0.92);
+  }
+}
+
+@media (max-width: 720px) {
+  .panel,
+  .track-item {
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  .panel::before,
+  .track-item::before {
+    display: none;
+  }
+}
