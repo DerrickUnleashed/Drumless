@@ -46,6 +46,14 @@
   color: var(--accent);
 }
 
+.brand-logo {
+  display: block;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
 .landing-nav-links {
   display: flex;
   align-items: center;
