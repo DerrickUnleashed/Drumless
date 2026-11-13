@@ -314,6 +314,7 @@ function Studio({
       </nav>
 
       <header className="hero">
+        <img className="hero-logo" src="/drum-set.png" alt="Drumless" width={56} height={56} />
         <p className="eyebrow">Practice tool</p>
         <h1>Drumless</h1>
         <p className="lede">
