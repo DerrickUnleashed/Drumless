@@ -5,9 +5,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# ffmpeg for yt-dlp post-processing + export; nodejs is the JS runtime
-# newer yt-dlp needs for YouTube extraction (input_handler auto-detects it).
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg nodejs && rm -rf /var/lib/apt/lists/*
+# ffmpeg for yt-dlp post-processing + export; deno is the JS runtime yt-dlp
+# recommends for YouTube extraction (nodejs kept as a fallback). The node
+# symlink matters because Debian installs the binary as `nodejs`, not `node`.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ffmpeg nodejs curl ca-certificates \
+    && ln -sf "$(command -v nodejs)" /usr/local/bin/node \
+    && curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
