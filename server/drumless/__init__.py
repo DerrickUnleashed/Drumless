@@ -1,1 +1,1 @@
-"""Drumless — drum removal + practice tempo tool."""
+"""Drumless - drum removal + practice tempo tool."""
