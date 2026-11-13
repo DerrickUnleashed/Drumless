@@ -118,6 +118,7 @@ def process_track(
 
     return {
         "job_id": job_id,
+        "input_wav": str(input_wav),
         "bpm": bpm,
         "bpm_env": detection["bpm_env"],
         "tempo_source": detection["source"],
