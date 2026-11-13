@@ -1,6 +1,7 @@
 """Input handling — turn either a file or a YouTube URL into a 44.1kHz stereo WAV."""
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -29,12 +30,51 @@ def _find_js_runtime_args() -> list[str]:
 
     Newer yt-dlp only enables deno by default, so node/bun need to be passed
     explicitly or extraction fails with "No supported JavaScript runtime".
+    Debian's `nodejs` package is often installed as `nodejs`, not `node`.
     """
-    for runtime in ("node", "deno", "bun"):
+    explicit = os.environ.get("YTDLP_JS_RUNTIME")
+    if explicit:
+        return ["--js-runtimes", explicit]
+
+    for runtime in ("deno", "node", "nodejs", "bun"):
         path = shutil.which(runtime)
         if path:
             return ["--js-runtimes", f"{runtime}:{path}"]
     return []
+
+
+def _network_args(workdir: Path) -> tuple[list[str], Path | None]:
+    """Optional proxy / cookie support for datacenter-hosted deployments.
+
+    YouTube blocks many cloud IP ranges (429 + "Sign in to confirm you're not a
+    bot"). Two escape hatches, both provided via env:
+
+      YTDLP_PROXY         proxy URL, e.g. http://user:pass@host:port
+      YTDLP_COOKIES       Netscape cookies.txt contents (secret env var)
+      YTDLP_COOKIES_FILE  path to cookies.txt on disk
+
+    Returns (args, temp_cookie_file_to_cleanup).
+    """
+    args: list[str] = []
+    cleanup: Path | None = None
+
+    proxy = os.environ.get("YTDLP_PROXY")
+    if proxy:
+        args += ["--proxy", proxy]
+
+    cookie_file = os.environ.get("YTDLP_COOKIES_FILE")
+    if cookie_file:
+        args += ["--cookies", cookie_file]
+    else:
+        cookies = os.environ.get("YTDLP_COOKIES")
+        if cookies:
+            workdir.mkdir(parents=True, exist_ok=True)
+            cleanup = workdir / ".yt_cookies.txt"
+            cleanup.write_text(cookies)
+            cleanup.chmod(0o600)
+            args += ["--cookies", str(cleanup)]
+
+    return args, cleanup
 
 
 class InputError(Exception):
@@ -85,6 +125,7 @@ def download_youtube(url: str, workdir: Path) -> Path:
     """
     workdir.mkdir(parents=True, exist_ok=True)
     js_runtime_args = _find_js_runtime_args()
+    network_args, cookies_temp = _network_args(workdir)
     cmd = [
         # Run yt-dlp as a module via the current interpreter so it works even
         # when .venv/bin isn't on PATH.
@@ -96,6 +137,7 @@ def download_youtube(url: str, workdir: Path) -> Path:
         "--no-playlist",
         "--postprocessor-args", "ffmpeg:-ar 44100 -ac 2",
         *js_runtime_args,
+        *network_args,
         # Fetch the EJS challenge-solver script so YouTube's JS/n challenges
         # resolve without manual setup (see wikis/External-Programs).
         "--remote-components", "ejs:github",
@@ -109,6 +151,9 @@ def download_youtube(url: str, workdir: Path) -> Path:
         )
     except subprocess.TimeoutExpired:
         raise InputError("YouTube download timed out (5 min). The video may be very long or blocked.")
+    finally:
+        if cookies_temp is not None:
+            cookies_temp.unlink(missing_ok=True)
 
     # Find the produced wav first: a nonzero exit code can be an *abort*, not a
     # failure (e.g. "Maximum number of downloads reached"), so if the WAV exists
