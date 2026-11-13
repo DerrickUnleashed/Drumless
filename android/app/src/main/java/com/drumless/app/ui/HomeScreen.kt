@@ -46,7 +46,7 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
         Text("Drumless", style = MaterialTheme.typography.headlineLarge)
         Text(
             "Remove the drums, lock a click to the detected tempo, and practice. " +
-                "Processing happens on your backend server — this app talks to it.",
+                "Processing happens on your backend server - this app talks to it.",
             style = MaterialTheme.typography.bodyMedium,
         )
 
