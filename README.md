@@ -97,5 +97,9 @@ free box:
 - Keep practice clips short; long tracks can OOM the container.
 - Model weights re-download after cold starts (no persistent disk).
 - Jobs are serialized to avoid concurrent OOMs.
+- **YouTube links usually fail from Render's datacenter IP** (`429` / "Sign in
+  to confirm you're not a bot"). Local runs work because of the residential IP.
+  Use file upload in production, or set `YTDLP_PROXY` / `YTDLP_COOKIES` in the
+  Render environment.
 - Upgrade Render to Standard (4GB) with a persistent disk (see comments in
   `server/render.yaml`) for reliable use.
