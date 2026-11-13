@@ -1,5 +1,14 @@
-import { useState } from "react";
-import { audioUrl, createJob, regenJob } from "./api";
+import { useCallback, useEffect, useState } from "react";
+import {
+  audioUrl,
+  createJob,
+  deleteTrack,
+  listTracks,
+  regenJob,
+  renameTrack,
+  trackUrl,
+} from "./api";
+import { AuthPanel } from "./components/AuthPanel";
 import { Link } from "./Link";
 import { AudioPanel } from "./components/AudioPanel";
 import { BpmControls } from "./components/BpmControls";
@@ -7,13 +16,16 @@ import { ClickControls } from "./components/ClickControls";
 import { DownloadPanel } from "./components/DownloadPanel";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { ProgressPanel } from "./components/ProgressPanel";
+import { TrackLibrary } from "./components/TrackLibrary";
 import { UploadForm } from "./components/UploadForm";
+import { useAuth } from "./hooks/useAuth";
 import { useJob } from "./hooks/useJob";
 import {
   DEFAULT_CLICK_GAIN_DB,
   MAX_BPM,
   MIN_BPM,
   type CreateJobInput,
+  type TrackSummary,
 } from "./types";
 import "./styles.css";
 
@@ -25,7 +37,50 @@ function clampBpm(bpm: number): number {
   return Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(bpm)));
 }
 
+function trackName(track: TrackSummary): string {
+  return track.custom_name?.trim() || track.original_song_name;
+}
+
+interface SignedUrls {
+  mixedWav: string;
+  backingWav: string;
+  mixedMp3: string;
+  backingMp3: string;
+}
+
 export default function App() {
+  const { configured, loading, session, signOut } = useAuth();
+
+  if (configured && loading) {
+    return (
+      <main className="app auth-screen">
+        <p className="hint">Loading…</p>
+      </main>
+    );
+  }
+
+  if (configured && !session) {
+    return <AuthPanel />;
+  }
+
+  return (
+    <Studio
+      authed={configured && session !== null}
+      email={session?.user.email ?? null}
+      onSignOut={signOut}
+    />
+  );
+}
+
+function Studio({
+  authed,
+  email,
+  onSignOut,
+}: {
+  authed: boolean;
+  email: string | null;
+  onSignOut: () => Promise<void>;
+}) {
   const [jobId, setJobId] = useState<string | null>(null);
   const [bpmEdit, setBpmEdit] = useState<{ jobId: string; value: number } | null>(
     null,
@@ -36,6 +91,8 @@ export default function App() {
   const [applying, setApplying] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [dismissedError, setDismissedError] = useState<string | null>(null);
+  const [tracks, setTracks] = useState<TrackSummary[]>([]);
+  const [signed, setSigned] = useState<SignedUrls | null>(null);
 
   const { job, error: jobError, refresh } = useJob(jobId);
 
@@ -48,19 +105,85 @@ export default function App() {
       : (detectedBpm ?? 120);
 
   const ready = jobId !== null && isDone;
-  const mixedUrl = ready ? audioUrl(jobId, "mixed", "wav", version) : null;
-  const backingUrl = ready ? audioUrl(jobId, "backing", "wav", version) : null;
+
+  const refreshTracks = useCallback(async () => {
+    if (!authed) {
+      return;
+    }
+    try {
+      setTracks(await listTracks());
+    } catch (caught) {
+      setActionError(errorMessage(caught));
+    }
+  }, [authed]);
+
+  useEffect(() => {
+    void refreshTracks();
+  }, [refreshTracks]);
+
+  useEffect(() => {
+    if (job?.status === "done") {
+      void refreshTracks();
+    }
+  }, [job?.status, refreshTracks]);
+
+  useEffect(() => {
+    if (!authed || !ready || jobId === null) {
+      setSigned(null);
+      return;
+    }
+
+    let cancelled = false;
+    Promise.all([
+      trackUrl(jobId, "mixed", "wav"),
+      trackUrl(jobId, "backing", "wav"),
+      trackUrl(jobId, "mixed", "mp3", true),
+      trackUrl(jobId, "backing", "mp3", true),
+    ])
+      .then(([mixedWav, backingWav, mixedMp3, backingMp3]) => {
+        if (!cancelled) {
+          setSigned({ mixedWav, backingWav, mixedMp3, backingMp3 });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSigned(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authed, ready, jobId, version]);
+
+  const mixedUrl = ready
+    ? authed
+      ? (signed?.mixedWav ?? null)
+      : audioUrl(jobId, "mixed", "wav", version)
+    : null;
+  const backingUrl = ready
+    ? authed
+      ? (signed?.backingWav ?? null)
+      : audioUrl(jobId, "backing", "wav", version)
+    : null;
   const downloads = ready
-    ? {
-        backing: {
-          wav: audioUrl(jobId, "backing", "wav"),
-          mp3: audioUrl(jobId, "backing", "mp3"),
-        },
-        mixed: {
-          wav: audioUrl(jobId, "mixed", "wav"),
-          mp3: audioUrl(jobId, "mixed", "mp3"),
-        },
-      }
+    ? authed
+      ? signed
+        ? {
+            backing: { wav: signed.backingWav, mp3: signed.backingMp3 },
+            mixed: { wav: signed.mixedWav, mp3: signed.mixedMp3 },
+          }
+        : { backing: null, mixed: null }
+      : {
+          backing: {
+            wav: audioUrl(jobId, "backing", "wav"),
+            mp3: audioUrl(jobId, "backing", "mp3"),
+          },
+          mixed: {
+            wav: audioUrl(jobId, "mixed", "wav"),
+            mp3: audioUrl(jobId, "mixed", "mp3"),
+          },
+        }
     : { backing: null, mixed: null };
 
   const active = job?.status === "queued" || job?.status === "running";
@@ -106,6 +229,54 @@ export default function App() {
     }
   }
 
+  function handleSelectTrack(track: TrackSummary) {
+    setActionError(null);
+    setBpmEdit(null);
+    setGainDb(
+      track.click_gain_db !== null
+        ? Math.round(track.click_gain_db)
+        : DEFAULT_CLICK_GAIN_DB,
+    );
+    setVersion((current) => current + 1);
+    setJobId(track.id);
+  }
+
+  async function handleRenameTrack(track: TrackSummary) {
+    const next = window.prompt("Rename track", trackName(track));
+    if (next === null) {
+      return;
+    }
+    const name = next.trim();
+    if (!name) {
+      return;
+    }
+    try {
+      await renameTrack(track.id, name);
+      await refreshTracks();
+    } catch (caught) {
+      setActionError(errorMessage(caught));
+    }
+  }
+
+  async function handleDeleteTrack(track: TrackSummary) {
+    const confirmed = window.confirm(
+      `Delete "${trackName(track)}"? This removes its audio permanently.`,
+    );
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await deleteTrack(track.id);
+      if (jobId === track.id) {
+        setJobId(null);
+        setSigned(null);
+      }
+      await refreshTracks();
+    } catch (caught) {
+      setActionError(errorMessage(caught));
+    }
+  }
+
   function handleDismiss() {
     setActionError(null);
     setDismissedError(jobError);
@@ -132,6 +303,14 @@ export default function App() {
           Home
         </Link>
         <span className="studio-nav-title">Studio</span>
+        {authed ? (
+          <div className="studio-account">
+            {email ? <span className="studio-account-email">{email}</span> : null}
+            <button className="button subtle" type="button" onClick={() => void onSignOut()}>
+              Sign out
+            </button>
+          </div>
+        ) : null}
       </nav>
 
       <header className="hero">
@@ -147,6 +326,17 @@ export default function App() {
 
       <div className="layout">
         <div className="column">
+          {authed ? (
+            <TrackLibrary
+              tracks={tracks}
+              selectedId={jobId}
+              disabled={starting || active}
+              onSelect={handleSelectTrack}
+              onRename={(track) => void handleRenameTrack(track)}
+              onDelete={(track) => void handleDeleteTrack(track)}
+              onRefresh={() => void refreshTracks()}
+            />
+          ) : null}
           <UploadForm disabled={starting || active} onStart={handleStart} />
           <ProgressPanel
             status={progressStatus}
@@ -165,7 +355,6 @@ export default function App() {
               }
             }}
           />
-          
         </div>
         <div className="column">
           <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
