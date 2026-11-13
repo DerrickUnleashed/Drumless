@@ -1,4 +1,4 @@
-"""Audio utility helpers — format conversion, mixing, export."""
+"""Audio utility helpers - format conversion, mixing, export."""
 from __future__ import annotations
 
 import os
@@ -47,7 +47,7 @@ def load_audio_as_numpy(path: str | Path, sr: int = 44100) -> tuple[np.ndarray, 
     """Load audio file and return (samples, sr).  Mono → stereo if needed."""
     data, file_sr = sf.read(str(path), dtype="float32")
     if file_sr != sr:
-        # Resample if needed (basic linear interpolation — fine for practice tool)
+        # Resample if needed (basic linear interpolation - fine for practice tool)
         from scipy.signal import resample
         num_samples = int(len(data) * sr / file_sr)
         data = resample(data, num_samples, axis=0)
