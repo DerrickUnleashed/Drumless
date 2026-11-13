@@ -7,6 +7,8 @@
   display: flow-root;
   width: 100%;
   overflow-x: clip;
+  --glass-stroke: rgba(255, 255, 255, 0.18);
+  --glass-blur: 22px;
 }
 
 .landing::before {
