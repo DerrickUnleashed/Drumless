@@ -136,7 +136,7 @@ export function Landing() {
     <div className="landing">
       <header className="landing-nav">
         <Link to="/" className="brand" aria-label="Drumless home">
-          <DrumIcon className="brand-mark" />
+          <img className="brand-logo" src="/drum-set.png" alt="" width={30} height={30} />
           <span>Drumless</span>
         </Link>
         <nav className="landing-nav-links" aria-label="Primary">
@@ -259,7 +259,7 @@ export function Landing() {
 
       <footer className="landing-footer">
         <Link to="/" className="brand" aria-label="Drumless home">
-          <DrumIcon className="brand-mark" />
+          <img className="brand-logo" src="/drum-set.png" alt="" width={30} height={30} />
           <span>Drumless</span>
         </Link>
         <p>Separate the drums. Keep the feel.</p>
