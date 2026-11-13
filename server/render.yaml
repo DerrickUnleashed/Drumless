@@ -3,7 +3,7 @@
 # Currently deployed on the FREE tier for evaluation:
 #   - plan: free  (512MB RAM, no persistent disk)
 #   - No disk: Demucs model weights (~300MB) and job outputs live on the
-#     ephemeral container filesystem — they're re-downloaded on each cold
+#     ephemeral container filesystem - they're re-downloaded on each cold
 #     start, and outputs vanish on restart. Keep practice tracks SHORT: the
 #     512MB box can OOM on long songs. YouTube-from-datacenter-IP is fragile;
 #     the file-upload path is the reliable one.
