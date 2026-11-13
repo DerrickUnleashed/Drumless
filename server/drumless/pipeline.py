@@ -47,7 +47,7 @@ def process_track(
 ) -> dict:
     """Run the full pipeline. Returns a dict of output file paths + metadata.
 
-    `uploaded_file` and `yt_url` are mutually exclusive — the app passes
+    `uploaded_file` and `yt_url` are mutually exclusive - the app passes
     whichever the user provided.
     """
     workdir = Path(workdir)
@@ -126,7 +126,7 @@ def process_track(
         "model": model,
         "files": {
             "backing": {"wav": str(backing_only_wav), "mp3": str(backing_only_mp3)},
-            "click": {"wav": str(click_wav_out)},  # internal only — regen source
+            "click": {"wav": str(click_wav_out)},  # internal only - regen source
             "mixed": {"wav": str(mixed_wav), "mp3": str(mixed_mp3)},
         },
     }
