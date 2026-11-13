@@ -19,10 +19,12 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 15% 5%, rgba(242, 181, 68, 0.12), transparent 28rem),
-    radial-gradient(circle at 85% 0%, rgba(111, 227, 164, 0.08), transparent 24rem),
-    var(--bg);
+  background-color: var(--bg);
+  background-image: url("/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .app {
