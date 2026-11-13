@@ -1,4 +1,4 @@
-"""Input handling — turn either a file or a YouTube URL into a 44.1kHz stereo WAV."""
+"""Input handling - turn either a file or a YouTube URL into a 44.1kHz stereo WAV."""
 from __future__ import annotations
 
 import os
@@ -89,7 +89,7 @@ def _validate_duration(path: Path) -> None:
     duration = get_duration_seconds(path)
     if duration > MAX_DURATION_SECONDS:
         raise DurationError(
-            f"Input is {duration:.0f}s ({duration / 60:.1f} min) — Drumless caps inputs at "
+            f"Input is {duration:.0f}s ({duration / 60:.1f} min) - Drumless caps inputs at "
             f"{MAX_DURATION_SECONDS // 60} minutes to keep CPU processing time reasonable. "
             "Trim the file or choose a shorter track."
         )
@@ -176,5 +176,5 @@ def download_youtube(url: str, workdir: Path) -> Path:
             f"Last error output:\n{(result.stderr or '')[-1500:] or (result.stdout or '')[-1500:]}"
         )
 
-    # Exit code 0 but no WAV produced — shouldn't happen with -x/--audio-format wav.
+    # Exit code 0 but no WAV produced - shouldn't happen with -x/--audio-format wav.
     raise InputError("Download reported success but no WAV was produced (unexpected yt-dlp behavior).")
