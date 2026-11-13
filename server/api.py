@@ -1,4 +1,4 @@
-"""Drumless backend — FastAPI server for the mobile app.
+"""Drumless backend - FastAPI server for the mobile app.
 
 Exposes the `drumless` pipeline (Demucs separation + BPM + click + export) as a
 simple job API:
@@ -21,7 +21,7 @@ Design notes / production caveats:
     in the private `drumless-audio` bucket. Requests without a bearer token use
     the original in-memory/on-disk job store, so old mobile builds keep working.
   - Separation is genuinely slow on CPU (1-4x realtime); jobs run in a
-    background thread, and clients poll — never run inline in a request.
+    background thread, and clients poll - never run inline in a request.
   - yt-dlp against datacenter IPs is fragile; the upload path always works.
 
 Run with:  uvicorn api:app --host 0.0.0.0 --port 8000
@@ -141,7 +141,7 @@ def _require_user(request: Request, client: SupabaseRest | None) -> dict[str, An
 
 
 # ---------------------------------------------------------------------------
-# Legacy (unauthenticated) job pipeline — kept for existing mobile builds
+# Legacy (unauthenticated) job pipeline - kept for existing mobile builds
 # ---------------------------------------------------------------------------
 
 def _run_job(job: Job, uploaded_file: str | None, yt_url: str | None) -> None:
@@ -183,13 +183,13 @@ def _run_job(job: Job, uploaded_file: str | None, yt_url: str | None) -> None:
         }
         job.detail_dir = _dir_for(job)
         job.status = "done"
-    except Exception as e:  # noqa: BLE001 — surface any failure to the client
+    except Exception as e:  # noqa: BLE001 - surface any failure to the client
         job.status = "error"
         job.message = str(e)
 
 
 # ---------------------------------------------------------------------------
-# Authenticated pipeline — persists to Supabase tracks + storage
+# Authenticated pipeline - persists to Supabase tracks + storage
 # ---------------------------------------------------------------------------
 
 def _storage_paths(user_id: str, track_id: str) -> dict[str, str]:
@@ -281,7 +281,7 @@ def _run_track_job(
         paths = _upload_outputs(client, user_id, track_id, result)
         try:
             duration = get_duration_seconds(result["input_wav"])
-        except Exception:  # noqa: BLE001 — duration is best-effort metadata
+        except Exception:  # noqa: BLE001 - duration is best-effort metadata
             duration = None
 
         client.update_track(
@@ -305,7 +305,7 @@ def _run_track_job(
         job.message = str(e)
         try:
             client.update_track(track_id, {"status": "error", "error_message": str(e)[:2000]})
-        except Exception:  # noqa: BLE001 — never mask the original error
+        except Exception:  # noqa: BLE001 - never mask the original error
             pass
 
 
@@ -320,7 +320,7 @@ async def lifespan(_app: FastAPI):
     if client is not None:
         try:
             client.mark_stale_tracks()
-        except Exception:  # noqa: BLE001 — startup must never crash on this
+        except Exception:  # noqa: BLE001 - startup must never crash on this
             pass
     yield
 
