@@ -520,3 +520,5 @@
     transition: none;
   }
 }
+
+.landing::before{display:none!important}
