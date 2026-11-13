@@ -72,8 +72,13 @@ def run_demucs(
                     "which can be several hundred MB)")
 
     env = dict(os.environ)
-    # Cap CPU threads so a long job doesn't starve the Gradio process.
-    env["DEMUCS_NUM_THREADS"] = str(max(1, (os.cpu_count() or 4) - 1))
+    # Cap threads/allocator arenas: PyTorch otherwise reserves one arena per
+    # core, which is what pushes a 512 MB container over the edge.
+    threads = os.environ.get("DEMUCS_THREADS", "1")
+    env["OMP_NUM_THREADS"] = threads
+    env["MKL_NUM_THREADS"] = threads
+    env["MALLOC_ARENA_MAX"] = "2"
+    env["DEMUCS_NUM_THREADS"] = threads
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, env=env)
