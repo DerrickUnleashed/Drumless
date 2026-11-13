@@ -1,6 +1,6 @@
 """Tempo (BPM) and beat detection via librosa.
 
-Strategy: prefer beat tracking on the isolated DRUMS stem — the drum onset
+Strategy: prefer beat tracking on the isolated DRUMS stem - the drum onset
 envelope is cleaner and more reliable than the full mix.  Fall back to the
 full mix if the drums stem is near-silent (e.g. a drum-less track).
 
@@ -9,7 +9,7 @@ We report three things:
     - beat_times : timestamps in seconds where beats fall (for click placement)
     - beat_frame : frame indices (for librosa.clicks when given sr)
 
-Tweak the BPM here (start_bpm, etc.) if a given song misdetects — beat
+Tweak the BPM here (start_bpm, etc.) if a given song misdetects - beat
 trackers commonly report half or double the "felt" tempo.
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ import numpy as np
 
 from .audio_utils import load_audio_as_numpy
 
-# Detection knobs — adjust for your tastes.
+# Detection knobs - adjust for your tastes.
 START_BPM = 120.0    # beats-per-minute prior used by librosa.beat.beat_track
 SILENCE_THRESHOLD = 1e-4   # RMS below this -> treat drums stem as near-silent (RMS handled below)
 
@@ -52,7 +52,7 @@ def detect_tempo(
                 precedence.append(("drums-stem", drums_stem_path))
             else:
                 print("[tempo] drums stem is near-silent; falling back to full mix")
-        except Exception as e:  # noqa: BLE001  — fall through on any load error
+        except Exception as e:  # noqa: BLE001  - fall through on any load error
             print(f"[tempo] could not load drums stem ({e}); falling back to full mix")
 
     precedence.append(("full-mix", full_mix_path))
@@ -69,7 +69,7 @@ def detect_tempo(
     tempo = float(np.atleast_1d(tempo)[0])
 
     # beat_track can return a degenerate tempo (0 / inf) on very short or
-    # atypical audio — clamp to a sane range so downstream math never divides
+    # atypical audio - clamp to a sane range so downstream math never divides
     # by zero or produces a nonsense click grid.
     if not np.isfinite(tempo) or not (30 <= tempo <= 400):
         tempo = START_BPM
