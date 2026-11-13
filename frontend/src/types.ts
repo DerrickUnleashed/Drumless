@@ -38,3 +38,21 @@ export interface RegenInput {
   bpm?: number;
   clickGainDb?: number;
 }
+
+export interface TrackSummary {
+  track_id: string;
+  id: string;
+  user_id: string;
+  original_song_name: string;
+  custom_name: string | null;
+  source_url: string | null;
+  bpm: number | null;
+  click_gain_db: number | null;
+  duration_seconds: number | null;
+  status: JobStatusValue;
+  error_message: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  has_backing: boolean;
+  has_mixed: boolean;
+}
