@@ -44,5 +44,58 @@ server/
     audio_utils.py      ffmpeg conversion, export, mixing, gain
     pipeline.py         stage orchestrator
   Dockerfile            containerized backend
-  render.yaml           Render blueprint (Standard + persistent disk)
+  render.yaml           Render blueprint (Free tier evaluation)
+supabase/
+  migrations/           tracks table, RLS, private drumless-audio bucket
 ```
+
+## Accounts, storage, and the track library
+
+Authenticated requests (`Authorization: Bearer <supabase access token>`) switch
+the backend into persistent mode:
+
+- Track metadata is stored in `public.tracks` (Supabase Postgres, RLS-scoped to
+  `auth.uid()`).
+- Audio is uploaded to the private `drumless-audio` bucket under
+  `{user_id}/{track_id}/` and served through short-lived signed URLs.
+- The web studio signs users in with Supabase Auth email + password.
+
+New endpoints:
+
+- `GET /api/tracks` - list the caller's tracks.
+- `GET /api/tracks/{id}` - fetch one track.
+- `PATCH /api/tracks/{id}` - `{custom_name}` rename.
+- `DELETE /api/tracks/{id}` - delete the row and all stored audio.
+- `GET /api/tracks/{id}/url?variant=backing|mixed|original&format=wav|mp3&download=bool`
+  - signed playback/download URL.
+
+Requests without a bearer token keep using the original in-memory job store, so
+existing Android builds continue to work. Authenticated jobs return the track id
+as `job_id`, so the same polling endpoints apply.
+
+### Environment
+
+| Variable | Where | Purpose |
+| --- | --- | --- |
+| `SUPABASE_URL` | backend | Project URL |
+| `SUPABASE_ANON_KEY` | backend | Token verification |
+| `SUPABASE_SERVICE_ROLE_KEY` | backend **only** | RLS-bypassing DB/storage access |
+| `DATA_DIR` | backend | Pipeline scratch space |
+| `SIGNED_URL_TTL` | backend | Signed URL lifetime (seconds) |
+| `VITE_API_BASE_URL` | frontend | Render API base URL |
+| `VITE_SUPABASE_URL` | frontend | Project URL |
+| `VITE_SUPABASE_ANON_KEY` | frontend | Public anon key |
+
+See `server/.env.example` and `frontend/.env.example`.
+
+### Free-tier reality check
+
+Deployed on Render Free (512MB RAM, ephemeral filesystem) + Supabase Free +
+Vercel Free. Demucs needs roughly 1GB+ for comfortable separation, so on the
+free box:
+
+- Keep practice clips short; long tracks can OOM the container.
+- Model weights re-download after cold starts (no persistent disk).
+- Jobs are serialized to avoid concurrent OOMs.
+- Upgrade Render to Standard (4GB) with a persistent disk (see comments in
+  `server/render.yaml`) for reliable use.
