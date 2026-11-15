@@ -7,7 +7,7 @@ import { MeshSurfaceSampler } from "three/examples/jsm/math/MeshSurfaceSampler.j
 
 const MODEL_PATH = "/drum_kit.glb";
 
-const PARTICLE_COUNT = 10000;
+const PARTICLE_COUNT = 5000;
 const PARTICLE_SIZE = 3.0;
 const MOUSE_RADIUS_PX = 110;
 
