@@ -317,8 +317,8 @@
   background: transparent;
   touch-action: none;
   cursor: grab;
-  margin-left: -40%;
-  margin-top: -25%;
+  margin-left: -20%;
+  margin-top: -15%;
 }
 
 .drum-stage:active {
