@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode, SVGProps } from "react";
 import { Link } from "./Link";
+import { DrumKitParticles } from "./components/DrumKitParticles";
 import "./styles.css";
 import "./landing.css";
 
@@ -227,6 +228,13 @@ export function Landing() {
               </article>
             ))}
           </div>
+        </section>
+
+        <section id="kit" className="landing-section drum-section">
+          <div className="section-head drum-section-head">
+            <p className="eyebrow">Break it down</p>
+          </div>
+          <DrumKitParticles />
         </section>
 
         <section id="how" className="landing-section">
