@@ -46,32 +46,28 @@
   font-size: 16px;
   line-height: 1.5;
   color: var(--text);
-  background: var(--bg);
+background: var(--bg);
 }
 
 body {
   background-color: var(--bg);
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(11, 9, 22, 0) 0%,
-      rgba(11, 9, 22, 0) 56%,
-      var(--bg) 100%
-    ),
-    url("/bg.png"),
-    radial-gradient(circle at 15% 5%, rgba(242, 181, 68, 0.1), transparent 30rem),
-    radial-gradient(circle at 82% 3%, rgba(120, 92, 190, 0.16), transparent 30rem),
-    radial-gradient(circle at 88% 62%, rgba(62, 49, 130, 0.14), transparent 36rem);
-  background-size: 100% 56.3vw, 100% auto, auto, auto, auto;
-  background-position: top center, top center, 15% 5%, 82% 3%, 88% 62%;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-attachment: scroll, scroll, fixed, fixed, fixed;
 }
 
 .app {
   width: min(1080px, calc(100% - 32px));
   margin: 0 auto;
   padding: 56px 0 80px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--bg);
+  background-image: url("/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .studio-nav {
