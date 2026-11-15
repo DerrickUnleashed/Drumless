@@ -161,6 +161,10 @@ h1 {
   padding: 22px;
 }
 
+.panel.track-library {
+  margin-bottom: 18px;
+}
+
 .panel h2 {
   margin-bottom: 16px;
   font-size: 1.1rem;
@@ -169,9 +173,10 @@ h1 {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
-  align-items: start;
+  grid-template-rows: auto auto auto;
+  height: 100%;
 }
 
 .column {
@@ -500,6 +505,7 @@ button:disabled {
   box-shadow: var(--surface-shadow);
   overflow: hidden;
   isolation: isolate;
+  min-height: 80px;
 }
 
 .track-item.selected {
