@@ -611,7 +611,7 @@ export function DrumKitParticles() {
     // Rise near the cursor quickly, but decay slowly so vibration
     // lingers and particles ease back to their home position.
     const RISE_TAU = 0.05;
-    const FALL_TAU = 0.85;
+    const FALL_TAU = 0.4;
 
     // Reused scratch vector so the loop allocates nothing.
     const projectedHome = new THREE.Vector3();
