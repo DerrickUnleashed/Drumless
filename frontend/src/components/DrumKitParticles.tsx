@@ -144,7 +144,7 @@ export function DrumKitParticles() {
       100
     );
 
-    camera.position.set(0, 1.5, 9);
+    camera.position.set(0, 1.7, 10.5);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -171,8 +171,7 @@ export function DrumKitParticles() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
 
-    controls.enableZoom = true;
-    controls.zoomSpeed = 0.8;
+    controls.enableZoom = false;
 
     controls.enablePan = false;
 
@@ -229,7 +228,7 @@ export function DrumKitParticles() {
 
       if (!maxDimension) return;
 
-      const scale = 5.5 / maxDimension;
+      const scale = 6.9 / maxDimension;
 
       root.scale.multiplyScalar(scale);
 
@@ -591,6 +590,22 @@ export function DrumKitParticles() {
       onPointerMove
     );
 
+    // Hard-lock zoom. Stop wheel events before OrbitControls sees
+    // them (page still scrolls), and block browser pinch-zoom over
+    // the canvas so scrolling never scales the kit.
+    function blockWheel(event: WheelEvent) {
+      event.stopPropagation();
+
+      if (event.ctrlKey) {
+        event.preventDefault();
+      }
+    }
+
+    stage.addEventListener("wheel", blockWheel, {
+      capture: true,
+      passive: false,
+    });
+
     // ================================================
     // RESIZE
     // ================================================
@@ -738,6 +753,10 @@ export function DrumKitParticles() {
         onPointerMove
       );
 
+      stage.removeEventListener("wheel", blockWheel, {
+        capture: true,
+      });
+
       if (particleCloud) {
         particleCloud.geometry.dispose();
 
@@ -769,7 +788,7 @@ export function DrumKitParticles() {
       ref={stageRef}
       className="drum-stage"
       role="img"
-      aria-label="Interactive 3D drum kit formed from 100,000 particles. Hover to scatter, drag to rotate and scroll to zoom."
+      aria-label="Interactive 3D drum kit formed from particles. Hover to ripple and drag to rotate."
     >
       <canvas
         ref={canvasRef}
