@@ -205,7 +205,6 @@ export function Landing() {
               <div className="studio-card-foot">
                 <span className="studio-card-meta">4/4 &middot; first beat 0.42s</span>
                 <span className="studio-card-play">
-                  <span className="studio-card-play-dot" /> Preview
                 </span>
               </div>
             </div>
