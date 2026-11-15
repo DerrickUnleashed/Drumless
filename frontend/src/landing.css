@@ -5,7 +5,7 @@
 .landing {
   position: relative;
   display: flow-root;
-  width: 100%;
+  width: auto;
   overflow-x: clip;
 }
 
@@ -304,7 +304,7 @@
 
 .drum-stage {
   position: relative;
-  width: 100%;
+  width: auto;
   height: auto;
   aspect-ratio: 1 / 1;
   border-radius: 16px;
@@ -312,8 +312,8 @@
   background: transparent;
   touch-action: none;
   cursor: grab;
-  margin-left: -20%;
-  margin-top: -5%;
+  margin-left: -40%;
+  margin-top: -25%;
 }
 
 .drum-stage:active {
@@ -322,7 +322,7 @@
 
 .drum-stage canvas {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
   outline: none;
 }
