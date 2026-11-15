@@ -78,7 +78,7 @@ export function BpmControls({
 
       <div className="button-row">
         <button
-          className="button"
+          className="button primary"
           type="button"
           onClick={() => onChange(clampBpm(Math.floor(value / 2)))}
           disabled={disabled}
@@ -86,7 +86,7 @@ export function BpmControls({
           ÷2
         </button>
         <button
-          className="button"
+          className="button primary"
           type="button"
           onClick={() => onChange(clampBpm(value * 2))}
           disabled={disabled}
