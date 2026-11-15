@@ -52,7 +52,7 @@ const VERTEX_SHADER = `
     pos += repelDirection *
       influence *
       uMouseActive *
-      0.65;
+      0.99;
 
     // Subtle ambient particle movement
     float drift = sin(
@@ -519,7 +519,6 @@ export function DrumKitParticles() {
     const intersection = new THREE.Vector3();
 
     function onPointerEnter() {
-      scatterTarget = reduceMotion ? 0 : 1;
       mouseActiveTarget = reduceMotion ? 0 : 1;
     }
 
@@ -605,7 +604,7 @@ export function DrumKitParticles() {
       uniforms.uTime.value = time * 0.001;
 
       // Smooth particle scatter transitions.
-      const transition = 1 - Math.exp(-delta * 5);
+      const transition = 1 - Math.exp(-delta * 3);
 
       uniforms.uScatter.value +=
         (scatterTarget - uniforms.uScatter.value) *
