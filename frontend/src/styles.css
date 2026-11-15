@@ -58,7 +58,7 @@ body {
       rgba(11, 9, 22, 0) 56%,
       var(--bg) 100%
     ),
-    url("/bg_dark.png"),
+    url("/bg.png"),
     radial-gradient(circle at 15% 5%, rgba(242, 181, 68, 0.1), transparent 30rem),
     radial-gradient(circle at 82% 3%, rgba(120, 92, 190, 0.16), transparent 30rem),
     radial-gradient(circle at 88% 62%, rgba(62, 49, 130, 0.14), transparent 36rem);
