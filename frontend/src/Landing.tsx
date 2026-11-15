@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode, SVGProps } from "react";
+import type { ReactNode, SVGProps } from "react";
 import { Link } from "./Link";
 import { DrumKitParticles } from "./components/DrumKitParticles";
 import "./styles.css";
@@ -89,11 +89,6 @@ function ArrowIcon(props: IconProps) {
   );
 }
 
-const WAVEFORM = [
-  22, 44, 30, 62, 38, 74, 52, 88, 60, 40, 70, 96, 64, 46, 78, 34, 58, 82, 48,
-  66, 28, 54, 90, 42, 72, 36, 60, 80, 50, 68, 32, 56,
-];
-
 const FEATURES = [
   {
     icon: DrumIcon,
@@ -182,31 +177,9 @@ export function Landing() {
             </ul>
           </div>
 
-          <div className="hero-visual" aria-hidden="true">
-            <div className="studio-card">
-              <div className="studio-card-head">
-                <span className="studio-card-title">backing + click</span>
-                <span className="studio-card-badge">128 BPM</span>
-              </div>
-              <div className="waveform">
-                {WAVEFORM.map((height, index) => (
-                  <span
-                    key={index}
-                    className="waveform-bar"
-                    style={
-                      {
-                        height: `${height}%`,
-                        "--hover-scale": Math.min(1.6, 100 / height).toFixed(2),
-                      } as CSSProperties
-                    }
-                  />
-                ))}
-              </div>
-              <div className="studio-card-foot">
-                <span className="studio-card-meta">4/4 &middot; first beat 0.42s</span>
-                <span className="studio-card-play">
-                </span>
-              </div>
+          <div className="hero-visual">
+            <div className="drum-card">
+              <DrumKitParticles />
             </div>
           </div>
         </section>
@@ -227,13 +200,6 @@ export function Landing() {
               </article>
             ))}
           </div>
-        </section>
-
-        <section id="kit" className="landing-section drum-section">
-          <div className="section-head drum-section-head">
-            <p className="eyebrow">Break it down</p>
-          </div>
-          <DrumKitParticles />
         </section>
 
         <section id="how" className="landing-section">
