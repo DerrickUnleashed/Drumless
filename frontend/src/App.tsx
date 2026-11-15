@@ -170,19 +170,13 @@ function Studio({
     ? authed
       ? signed
         ? {
-            backing: { wav: signed.backingWav, mp3: signed.backingMp3 },
-            mixed: { wav: signed.mixedWav, mp3: signed.mixedMp3 },
+            backing: { mp3: signed.backingMp3 },
+            mixed: { mp3: signed.mixedMp3 },
           }
         : { backing: null, mixed: null }
       : {
-          backing: {
-            wav: audioUrl(jobId, "backing", "wav"),
-            mp3: audioUrl(jobId, "backing", "mp3"),
-          },
-          mixed: {
-            wav: audioUrl(jobId, "mixed", "wav"),
-            mp3: audioUrl(jobId, "mixed", "mp3"),
-          },
+          backing: { mp3: audioUrl(jobId, "backing", "mp3") },
+          mixed: { mp3: audioUrl(jobId, "mixed", "mp3") },
         }
     : { backing: null, mixed: null };
 
