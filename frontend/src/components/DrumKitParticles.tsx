@@ -9,6 +9,7 @@ const MODEL_PATH = "/drum_kit.glb";
 
 const PARTICLE_COUNT = 5000;
 const PARTICLE_SIZE = 5.0;
+const MOUSE_RADIUS_PX = 110;
 
 const VERTEX_SHADER = `
   attribute vec3 aHome;
@@ -19,9 +20,6 @@ const VERTEX_SHADER = `
   uniform float uTime;
   uniform float uScatter;
   uniform float uSize;
-  uniform vec3 uMouse;
-  uniform float uMouseActive;
-  uniform float uMouseRadius;
 
   varying vec3 vColor;
   varying float vAlpha;
@@ -39,16 +37,8 @@ const VERTEX_SHADER = `
     // Per-particle activation energy (rises near cursor, decays after).
     float influence = aEnergy;
 
-    vec3 mouseDelta = aHome - uMouse;
-
-    vec3 repelDirection = normalize(
-      mouseDelta + vec3(0.0001)
-    );
-
-    // Push away from the cursor.
-    pos += repelDirection *
-      influence *
-      0.35;
+    // Displace along each particle's random direction.
+    pos += direction * influence * 0.35;
 
     // Per-particle vibration while affected.
     float phase = aRandom.y * 100.0;
@@ -197,13 +187,13 @@ export function DrumKitParticles() {
       uTime: { value: 0 },
       uScatter: { value: 0 },
       uSize: { value: PARTICLE_SIZE },
-      uMouse: { value: new THREE.Vector3(0, 0, 0) },
-      uMouseActive: { value: 0 },
-      uMouseRadius: { value: 0.90 },
     };
 
     let scatterTarget = 0;
     let mouseActiveTarget = 0;
+
+    let viewWidth = 1;
+    let viewHeight = 1;
 
     // ================================================
     // MODEL NORMALIZATION
@@ -531,19 +521,10 @@ export function DrumKitParticles() {
     );
 
     // ================================================
-    // MOUSE INTERACTION
+    // MOUSE INTERACTION (screen space)
     // ================================================
 
-    const raycaster = new THREE.Raycaster();
-
-    const pointer = new THREE.Vector2();
-
-    const interactionPlane = new THREE.Plane(
-      new THREE.Vector3(0, 0, 1),
-      0
-    );
-
-    const intersection = new THREE.Vector3();
+    const pointer = new THREE.Vector2(0, 0);
 
     function onPointerEnter() {
       mouseActiveTarget = reduceMotion ? 0 : 1;
@@ -554,7 +535,7 @@ export function DrumKitParticles() {
       mouseActiveTarget = 0;
     }
 
-    function onPointerMove(event: PointerEvent) {
+    const onPointerMove = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
 
       pointer.x =
@@ -562,18 +543,7 @@ export function DrumKitParticles() {
 
       pointer.y =
         -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(pointer, camera);
-
-      if (
-        raycaster.ray.intersectPlane(
-          interactionPlane,
-          intersection
-        )
-      ) {
-        uniforms.uMouse.value.copy(intersection);
-      }
-    }
+    };
 
     canvas.addEventListener(
       "pointerenter",
@@ -610,18 +580,21 @@ export function DrumKitParticles() {
     // RESIZE
     // ================================================
 
-    function resize() {
+    const resize = () => {
       const width = stage.clientWidth;
       const height = stage.clientHeight;
 
       if (!width || !height) return;
+
+      viewWidth = width;
+      viewHeight = height;
 
       camera.aspect = width / height;
 
       camera.updateProjectionMatrix();
 
       renderer.setSize(width, height, false);
-    }
+    };
 
     const observer = new ResizeObserver(resize);
 
@@ -640,6 +613,9 @@ export function DrumKitParticles() {
     const RISE_TAU = 0.05;
     const FALL_TAU = 0.85;
 
+    // Reused scratch vector so the loop allocates nothing.
+    const projectedHome = new THREE.Vector3();
+
     function updateVibrationEnergy(delta: number) {
       if (!energyAttribute || !homesAttribute) return;
 
@@ -649,14 +625,23 @@ export function DrumKitParticles() {
       const homes =
         homesAttribute.array as Float32Array;
 
-      const mouse = uniforms.uMouse.value;
-      const radius = uniforms.uMouseRadius.value;
-
       const active = mouseActiveTarget > 0;
-      const invRadius = radius > 0 ? 1 / radius : 0;
 
       const riseK = 1 - Math.exp(-delta / RISE_TAU);
       const fallK = 1 - Math.exp(-delta / FALL_TAU);
+
+      // Make sure projection uses the current camera transform.
+      camera.updateMatrixWorld();
+
+      const width = viewWidth;
+      const height = viewHeight;
+
+      // Mouse position in pixels (NDC -> pixels).
+      const mouseX = (pointer.x * 0.5 + 0.5) * width;
+      const mouseY = (pointer.y * 0.5 + 0.5) * height;
+
+      const invRadius =
+        MOUSE_RADIUS_PX > 0 ? 1 / MOUSE_RADIUS_PX : 0;
 
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         let target = 0;
@@ -664,13 +649,27 @@ export function DrumKitParticles() {
         if (active) {
           const offset = i * 3;
 
-          const dx = homes[offset] - mouse.x;
-          const dy = homes[offset + 1] - mouse.y;
-          const dz = homes[offset + 2] - mouse.z;
+          projectedHome.set(
+            homes[offset],
+            homes[offset + 1],
+            homes[offset + 2]
+          );
 
+          // Project the world-space home position to NDC.
+          projectedHome.project(camera);
+
+          const screenX =
+            (projectedHome.x * 0.5 + 0.5) * width;
+
+          const screenY =
+            (projectedHome.y * 0.5 + 0.5) * height;
+
+          const dx = screenX - mouseX;
+          const dy = screenY - mouseY;
+
+          // 2D pixel distance, independent of particle depth.
           const distance =
-            Math.sqrt(dx * dx + dy * dy + dz * dz) *
-            invRadius;
+            Math.sqrt(dx * dx + dy * dy) * invRadius;
 
           const t = Math.min(Math.max(distance, 0), 1);
 
@@ -705,16 +704,13 @@ export function DrumKitParticles() {
         (scatterTarget - uniforms.uScatter.value) *
         transition;
 
-      uniforms.uMouseActive.value +=
-        (mouseActiveTarget - uniforms.uMouseActive.value) *
-        transition;
-
-      updateVibrationEnergy(delta);
-
-      // Keep camera controls responsive.
+      // Keep camera controls responsive, then project with the
+      // freshly-updated camera matrices.
       if (!reduceMotion) {
         controls.update();
       }
+
+      updateVibrationEnergy(delta);
 
       renderer.render(scene, camera);
 
