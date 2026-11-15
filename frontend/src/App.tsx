@@ -325,49 +325,44 @@ function Studio({
 
       <ErrorBanner message={bannerMessage} onDismiss={handleDismiss} />
 
+      <TrackLibrary
+        tracks={tracks}
+        selectedId={jobId}
+        disabled={starting || active}
+        onSelect={handleSelectTrack}
+        onRename={(track) => void handleRenameTrack(track)}
+        onDelete={(track) => void handleDeleteTrack(track)}
+        onRefresh={() => void refreshTracks()}
+      />
+
       <div className="layout">
-        <div className="column">
-          {authed ? (
-            <TrackLibrary
-              tracks={tracks}
-              selectedId={jobId}
-              disabled={starting || active}
-              onSelect={handleSelectTrack}
-              onRename={(track) => void handleRenameTrack(track)}
-              onDelete={(track) => void handleDeleteTrack(track)}
-              onRefresh={() => void refreshTracks()}
-            />
-          ) : null}
-          <UploadForm disabled={starting || active} onStart={handleStart} />
-          <ProgressPanel
-            status={progressStatus}
-            stage={job?.stage ?? null}
-            progress={job?.progress ?? 0}
-            message={progressMessage}
-          />
-          <BpmControls
-            value={bpm}
-            detectedBpm={detectedBpm}
-            tempoSource={job?.tempo_source ?? null}
-            disabled={!isDone}
-            onChange={(next) => {
-              if (jobId !== null) {
-                setBpmEdit({ jobId, value: next });
-              }
-            }}
-          />
-        </div>
-        <div className="column">
-          <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
-          <ClickControls
-            gainDb={gainDb}
-            disabled={!isDone}
-            applying={applying}
-            onChange={setGainDb}
-            onApply={handleApply}
-          />
-          <DownloadPanel backing={downloads.backing} mixed={downloads.mixed} />
-        </div>
+        <UploadForm disabled={starting || active} onStart={handleStart} />
+        <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
+        <ProgressPanel
+          status={progressStatus}
+          stage={job?.stage ?? null}
+          progress={job?.progress ?? 0}
+          message={progressMessage}
+        />
+        <ClickControls
+          gainDb={gainDb}
+          disabled={!isDone}
+          applying={applying}
+          onChange={setGainDb}
+          onApply={handleApply}
+        />
+        <BpmControls
+          value={bpm}
+          detectedBpm={detectedBpm}
+          tempoSource={job?.tempo_source ?? null}
+          disabled={!isDone}
+          onChange={(next) => {
+            if (jobId !== null) {
+              setBpmEdit({ jobId, value: next });
+            }
+          }}
+        />
+        <DownloadPanel backing={downloads.backing} mixed={downloads.mixed} />
       </div>
     </main>
   );
