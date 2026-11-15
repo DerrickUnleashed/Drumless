@@ -156,7 +156,7 @@ export function Landing() {
             <h1>Take the drums out. Keep the groove.</h1>
             <p className="lede">
               Drumless separates the drum stem from any track, detects the tempo,
-              and builds a click track that locks to the song&rsquo;s feel &mdash; so
+              and builds a click track that locks to the song&rsquo;s feel - so
               you can practice on your own terms.
             </p>
             <div className="hero-actions">
