@@ -7,8 +7,8 @@ import { MeshSurfaceSampler } from "three/examples/jsm/math/MeshSurfaceSampler.j
 
 const MODEL_PATH = "/drum_kit.glb";
 
-const PARTICLE_COUNT = 200000;
-const PARTICLE_SIZE = 0.5;
+const PARTICLE_COUNT = 300000;
+const PARTICLE_SIZE = 1;
 const MOUSE_RADIUS_PX = 110;
 
 const VERTEX_SHADER = `
@@ -218,7 +218,7 @@ export function DrumKitParticles() {
 
       if (!maxDimension) return;
 
-      const scale = 7 / maxDimension;
+      const scale = 5.5 / maxDimension;
 
       root.scale.multiplyScalar(scale);
 
