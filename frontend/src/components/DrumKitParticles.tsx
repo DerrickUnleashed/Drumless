@@ -14,6 +14,7 @@ const VERTEX_SHADER = `
   attribute vec3 aHome;
   attribute vec3 aRandom;
   attribute vec3 aColor;
+  attribute float aEnergy;
 
   uniform float uTime;
   uniform float uScatter;
@@ -35,24 +36,31 @@ const VERTEX_SHADER = `
 
     pos += direction * explosion;
 
-    // Cursor-based particle repulsion
-    vec3 mouseDelta = pos - uMouse;
-    float mouseDistance = length(mouseDelta);
+    // Per-particle activation energy (rises near cursor, decays after).
+    float influence = aEnergy;
 
-    float influence = 1.0 - smoothstep(
-      0.0,
-      uMouseRadius,
-      mouseDistance
-    );
+    vec3 mouseDelta = aHome - uMouse;
 
     vec3 repelDirection = normalize(
       mouseDelta + vec3(0.0001)
     );
 
+    // Push away from the cursor.
     pos += repelDirection *
       influence *
-      uMouseActive *
-      0.99;
+      0.35;
+
+    // Per-particle vibration while affected.
+    float phase = aRandom.y * 100.0;
+
+    float vibration =
+      sin(uTime * 45.0 + phase) * 0.6 +
+      sin(uTime * 73.0 + aRandom.z * 60.0) * 0.4;
+
+    pos += direction *
+      vibration *
+      influence *
+      0.07;
 
     // Subtle ambient particle movement
     float drift = sin(
@@ -183,13 +191,16 @@ export function DrumKitParticles() {
 
     let particleCloud: THREE.Points | null = null;
 
+    let energyAttribute: THREE.BufferAttribute | null = null;
+    let homesAttribute: THREE.BufferAttribute | null = null;
+
     const uniforms = {
       uTime: { value: 0 },
       uScatter: { value: 0 },
       uSize: { value: PARTICLE_SIZE },
       uMouse: { value: new THREE.Vector3(0, 0, 0) },
       uMouseActive: { value: 0 },
-      uMouseRadius: { value: 0.85 },
+      uMouseRadius: { value: 0.90 },
     };
 
     let scatterTarget = 0;
@@ -350,6 +361,10 @@ export function DrumKitParticles() {
         PARTICLE_COUNT * 3
       );
 
+      const energies = new Float32Array(
+        PARTICLE_COUNT
+      );
+
       const point = new THREE.Vector3();
       const normal = new THREE.Vector3();
 
@@ -447,6 +462,19 @@ export function DrumKitParticles() {
         "aColor",
         new THREE.BufferAttribute(colors, 3)
       );
+
+      geometry.setAttribute(
+        "aEnergy",
+        new THREE.BufferAttribute(energies, 1)
+      );
+
+      energyAttribute = geometry.getAttribute(
+        "aEnergy"
+      ) as THREE.BufferAttribute;
+
+      homesAttribute = geometry.getAttribute(
+        "aHome"
+      ) as THREE.BufferAttribute;
 
       geometry.computeBoundingSphere();
 
@@ -592,6 +620,58 @@ export function DrumKitParticles() {
 
     let previousTime = 0;
 
+    // Rise near the cursor quickly, but decay slowly so vibration
+    // lingers and particles ease back to their home position.
+    const RISE_TAU = 0.05;
+    const FALL_TAU = 0.85;
+
+    function updateVibrationEnergy(delta: number) {
+      if (!energyAttribute || !homesAttribute) return;
+
+      const energies =
+        energyAttribute.array as Float32Array;
+
+      const homes =
+        homesAttribute.array as Float32Array;
+
+      const mouse = uniforms.uMouse.value;
+      const radius = uniforms.uMouseRadius.value;
+
+      const active = mouseActiveTarget > 0;
+      const invRadius = radius > 0 ? 1 / radius : 0;
+
+      const riseK = 1 - Math.exp(-delta / RISE_TAU);
+      const fallK = 1 - Math.exp(-delta / FALL_TAU);
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        let target = 0;
+
+        if (active) {
+          const offset = i * 3;
+
+          const dx = homes[offset] - mouse.x;
+          const dy = homes[offset + 1] - mouse.y;
+          const dz = homes[offset + 2] - mouse.z;
+
+          const distance =
+            Math.sqrt(dx * dx + dy * dy + dz * dz) *
+            invRadius;
+
+          const t = Math.min(Math.max(distance, 0), 1);
+
+          target = 1 - t * t * (3 - 2 * t);
+        }
+
+        const current = energies[i];
+
+        const k = target > current ? riseK : fallK;
+
+        energies[i] = current + (target - current) * k;
+      }
+
+      energyAttribute.needsUpdate = true;
+    }
+
     function animate(time: number) {
       if (disposed) return;
 
@@ -613,6 +693,8 @@ export function DrumKitParticles() {
       uniforms.uMouseActive.value +=
         (mouseActiveTarget - uniforms.uMouseActive.value) *
         transition;
+
+      updateVibrationEnergy(delta);
 
       // Keep camera controls responsive.
       if (!reduceMotion) {
