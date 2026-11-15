@@ -178,9 +178,7 @@ export function Landing() {
           </div>
 
           <div className="hero-visual">
-            <div className="drum-card">
-              <DrumKitParticles />
-            </div>
+            <DrumKitParticles />
           </div>
         </section>
 
