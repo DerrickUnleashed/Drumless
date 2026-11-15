@@ -586,38 +586,50 @@
 .studio-card,
 .feature-card,
 .step,
-.cta-band,
-
-.landing-nav::before,
-.landing-nav::after,
-.studio-card::before,
-.studio-card::after,
-.feature-card::before,
-.feature-card::after,
-.step::before,
-.step::after,
-.cta-band::before,
-.cta-band::after,
+.cta-band {
+  position: relative;
+}
 
 .landing-nav::before,
 .studio-card::before,
 .feature-card::before,
 .step::before,
-.cta-band::before,
+.cta-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
 
 .landing-nav::after,
 .studio-card::after,
 .feature-card::after,
 .step::after,
-.cta-band::after,
+.cta-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
 
 @media (max-width: 640px) {
   .landing-nav::before,
   .studio-card::before,
   .feature-card::before,
   .step::before,
-  .cta-band::before,
-  .drum-card::before {
+  .cta-band::before {
+    display: none;
+  }
+
+  .landing-nav::after,
+  .studio-card::after,
+  .feature-card::after,
+  .step::after,
+  .cta-band::after {
     display: none;
   }
 }
