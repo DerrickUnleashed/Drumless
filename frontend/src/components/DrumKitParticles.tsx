@@ -779,6 +779,8 @@ export function DrumKitParticles() {
     };
   }, []);
 
+  if (IS_MOBILE) return null;
+
   return (
     <div
       ref={stageRef}
