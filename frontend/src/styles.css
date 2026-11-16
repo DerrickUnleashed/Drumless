@@ -18,24 +18,10 @@
   --glass-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
 
   /* Unified glossy glass surface (landing + studio boxes). */
-  --surface-bg: rgba(28, 24, 52, 0.1);
-  --surface-sheen: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(255, 255, 255, 0.03) 34%,
-    rgba(255, 255, 255, 0) 58%
-  );
-  --surface-sheen-hover: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.04) 34%,
-    rgba(255, 255, 255, 0) 58%
-  );
-  --surface-glow: radial-gradient(
-    120% 90% at 18% -8%,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0) 55%
-  );
+  --surface-bg: rgba(28, 24, 52, 0.005);
+  --surface-sheen: none;
+  --surface-sheen-hover: none;
+  --surface-glow: none;
   --surface-border: rgba(255, 255, 255, 0.24);
   --surface-blur: blur(14px) saturate(185%) brightness(1.08);
   --surface-shadow:
@@ -573,11 +559,16 @@ button:disabled {
 .studio-layout {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
   gap: 16px;
   margin: 24px 0;
 }
 
-.studio-layout > * {
+.studio-layout > .panel,
+.studio-layout > .panel .panel,
+.studio-layout > .upload-form,
+.studio-layout > .audio-panel,
+.studio-layout > .track-library {
   border: 1px solid var(--surface-border);
   border-radius: 14px;
   background-color: var(--surface-bg);
@@ -586,19 +577,13 @@ button:disabled {
   padding: 16px;
 }
 
-.studio-right-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: 100%;
+.studio-layout > :nth-child(3) {
+  grid-row: 1;
 }
 
-.studio-right-column > * {
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
+.studio-layout > :nth-child(4) {
+  grid-row: 2;
+  grid-column: 3;
 }
 
 .studio-separator {
