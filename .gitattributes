@@ -1,0 +1,37 @@
+# Set default line endings to LF for all text files
+* text=auto
+
+# Normalize line endings to LF on checkout
+* text=lf
+
+# Mark common binary file types
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.glb binary
+*.gltf text
+*.tar binary
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.mp4 binary
+*.mov binary
+*.exe binary
+*.otb binary
+*.pyc binary
+*.pyo binary
+*.so binary
+*.dll binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+
+# Avoid auto-conversion of CRLF to LF on checkout
+*.cs eol=crlf
+*.h eol=crlf
+*.cpp eol=crlf
+*.hpp eol=crlf
