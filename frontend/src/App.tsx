@@ -328,7 +328,14 @@ function Studio({
         onDelete={(track) => void handleDeleteTrack(track)}
         onRefresh={() => void refreshTracks()}
       />
-
+      {job?.status === "running" || starting ? (
+        <ProgressPanel
+          status="running"
+          stage={job?.stage ?? null}
+          progress={job?.progress ?? 0}
+          message={progressMessage}
+        />
+      ) : null}
       <div className="studio-layout">
         <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
         <section className="panel">
@@ -353,14 +360,6 @@ function Studio({
         </section>
         <UploadForm disabled={starting || active} onStart={handleStart} />
       </div>
-      {job?.status === "running" || starting ? (
-        <ProgressPanel
-          status="running"
-          stage={job?.stage ?? null}
-          progress={job?.progress ?? 0}
-          message={progressMessage}
-        />
-      ) : null}
     </main>
   );
 }
