@@ -13,7 +13,6 @@ import { Link } from "./Link";
 import { AudioPanel } from "./components/AudioPanel";
 import { BpmControls } from "./components/BpmControls";
 import { ClickControls } from "./components/ClickControls";
-import { DownloadPanel } from "./components/DownloadPanel";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { ProgressPanel } from "./components/ProgressPanel";
 import { TrackLibrary } from "./components/TrackLibrary";
@@ -308,7 +307,6 @@ function Studio({
       </nav>
 
       <header className="hero">
-        <img className="hero-logo" src="/drum-set.png" alt="Drumless" width={56} height={56} />
         <p className="eyebrow">Practice tool</p>
         <h1>Drumless</h1>
         <p className="lede">
