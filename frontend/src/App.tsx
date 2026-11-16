@@ -165,25 +165,10 @@ function Studio({
       ? (signed?.backingWav ?? null)
       : audioUrl(jobId, "backing", "wav", version)
     : null;
-  const downloads = ready
-    ? authed
-      ? signed
-        ? {
-            backing: { mp3: signed.backingMp3 },
-            mixed: { mp3: signed.mixedMp3 },
-          }
-        : { backing: null, mixed: null }
-      : {
-          backing: { mp3: audioUrl(jobId, "backing", "mp3") },
-          mixed: { mp3: audioUrl(jobId, "mixed", "mp3") },
-        }
-    : { backing: null, mixed: null };
-
   const active = job?.status === "queued" || job?.status === "running";
   const bannerMessage =
     actionError ??
     (jobError !== null && jobError !== dismissedError ? jobError : null);
-  const progressStatus = starting ? "queued" : (job?.status ?? null);
   const progressMessage = starting ? "Starting job…" : (job?.message ?? "");
 
   async function handleStart(input: CreateJobInput) {
