@@ -332,7 +332,7 @@ function Studio({
       <div className="studio-layout">
         <UploadForm disabled={starting || active} onStart={handleStart} />
         <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
-        <div className="studio-right-column">
+        <section className="panel">
           <ClickControls
             gainDb={gainDb}
             disabled={!isDone}
@@ -351,7 +351,7 @@ function Studio({
               }
             }}
           />
-        </div>
+        </section>
       </div>
 
       <hr className="studio-separator" />
