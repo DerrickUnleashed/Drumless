@@ -27,6 +27,6 @@ describe("AudioPanel", () => {
 
     expect(screen.getByLabelText("Backing + click")).not.toHaveAttribute("src");
     expect(screen.getByLabelText("Backing only")).not.toHaveAttribute("src");
-    expect(screen.getAllByText(/process a track to listen/i)).toHaveLength(2);
+    expect(screen.getAllByText(/Listen/i)).toHaveLength(1);
   });
 });
