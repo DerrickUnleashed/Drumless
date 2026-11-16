@@ -176,6 +176,8 @@ export function DrumKitParticles() {
     controls.target.set(0, 0, 0);
     controls.update();
 
+    controls.enabled = !IS_MOBILE;
+
     // ================================================
     // PARTICLE STATE
     // ================================================
@@ -547,20 +549,22 @@ export function DrumKitParticles() {
         -((event.clientY - rect.top) / rect.height) * 2 + 1;
     };
 
-    canvas.addEventListener(
-      "pointerenter",
-      onPointerEnter
-    );
+    if (!IS_MOBILE) {
+      canvas.addEventListener(
+        "pointerenter",
+        onPointerEnter
+      );
 
-    canvas.addEventListener(
-      "pointerleave",
-      onPointerLeave
-    );
+      canvas.addEventListener(
+        "pointerleave",
+        onPointerLeave
+      );
 
-    canvas.addEventListener(
-      "pointermove",
-      onPointerMove
-    );
+      canvas.addEventListener(
+        "pointermove",
+        onPointerMove
+      );
+    }
 
     // Hard-lock zoom. Stop wheel events before OrbitControls sees
     // them (page still scrolls), and block browser pinch-zoom over
@@ -573,10 +577,12 @@ export function DrumKitParticles() {
       }
     }
 
-    stage.addEventListener("wheel", blockWheel, {
-      capture: true,
-      passive: false,
-    });
+    if (!IS_MOBILE) {
+      stage.addEventListener("wheel", blockWheel, {
+        capture: true,
+        passive: false,
+      });
+    }
 
     // ================================================
     // RESIZE
