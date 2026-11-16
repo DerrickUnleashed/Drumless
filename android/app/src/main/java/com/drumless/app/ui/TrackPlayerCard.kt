@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
@@ -69,24 +70,30 @@ fun TrackPlayerCard(title: String, url: String, filename: String) {
     }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF14112A),
+            contentColor = Color(0xFFECE9F7)
+        )
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFECE9F7)
+            )
+
             if (durationSec > 0) {
-                Slider(
-                    value = positionSec.toFloat(),
-                    onValueChange = { player.seekTo((it * 1000).toLong()) },
-                    valueRange = 0f..durationSec.toFloat(),
-                )
+                Slider(value = positionSec.toFloat(), onValueChange = { player.seekTo((it * 1000).toLong()) }, valueRange = 0f..durationSec.toFloat())
                 val m = { s: Int -> "%d:%02d".format(s / 60, s % 60) }
-                Text("${m(positionSec)} / ${m(durationSec)}", style = MaterialTheme.typography.labelSmall)
+                Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("${m(positionSec)}", style = MaterialTheme.typography.bodySmall, color = Color(0xFFA8A2C8))
+                    Text("${m(durationSec)}", style = MaterialTheme.typography.bodySmall, color = Color(0xFFA8A2C8))
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Button(onClick = {
-                    if (player.isPlaying) player.pause() else player.play()
-                }) {
+
+            Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = { if (isPlaying) player.pause() else player.play() }) {
                     Text(if (isPlaying) "Pause" else "Play")
                 }
                 Button(onClick = {
