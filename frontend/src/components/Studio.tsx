@@ -1,6 +1,7 @@
 import "../styles.css";
 
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "../Link";
 import {
   audioUrl,
   createJob,
@@ -10,8 +11,6 @@ import {
   renameTrack,
   trackUrl,
 } from "../api";
-import { AuthPanel } from "../components/AuthPanel";
-import { Link } from "../Link";
 import { AudioPanel } from "./AudioPanel";
 import { BpmControls } from "./BpmControls";
 import { ClickControls } from "./ClickControls";
@@ -19,7 +18,6 @@ import { ErrorBanner } from "./ErrorBanner";
 import { ProgressPanel } from "./ProgressPanel";
 import { TrackLibrary } from "./TrackLibrary";
 import { UploadForm } from "./UploadForm";
-import { useAuth } from "../hooks/useAuth";
 import { useJob } from "../hooks/useJob";
 import {
   DEFAULT_CLICK_GAIN_DB,
