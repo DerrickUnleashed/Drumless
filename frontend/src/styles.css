@@ -22,7 +22,7 @@
   --surface-sheen: none;
   --surface-sheen-hover: none;
   --surface-glow: none;
-  --surface-border: rgba(255, 255, 255, 0.24);
+  --surface-border: rgba(255, 255, 255, 0.1);
   --surface-blur: blur(14px) saturate(185%) brightness(1.08);
   --surface-shadow:
     0 30px 70px rgba(0, 0, 0, 0.45),
