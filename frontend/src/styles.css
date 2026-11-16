@@ -67,6 +67,8 @@ body {
   -webkit-backdrop-filter: var(--surface-blur);
   backdrop-filter: var(--surface-blur);
   box-shadow: var(--surface-shadow);
+  width: 95%;
+  margin: 0% auto 2% auto;
 }
 
 .back-link {
