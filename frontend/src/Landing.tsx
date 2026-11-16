@@ -107,7 +107,7 @@ const FEATURES = [
   },
   {
     icon: DownloadIcon,
-    title: "WAV and MP3",
+    title: "MP3",
     body: "Play both mixes in the browser or download the backing and the backing-plus-click at full quality.",
   },
 ] as const;
