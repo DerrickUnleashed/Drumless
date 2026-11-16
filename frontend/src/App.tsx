@@ -353,16 +353,14 @@ function Studio({
         </section>
         <UploadForm disabled={starting || active} onStart={handleStart} />
       </div>
-      <div className="processing-area">
-        {job?.status === "running" || starting ? (
-          <ProgressPanel
-            status="running"
-            stage={job?.stage ?? null}
-            progress={job?.progress ?? 0}
-            message={progressMessage}
-          />
-        ) : null}
-      </div>
+      {job?.status === "running" || starting ? (
+        <ProgressPanel
+          status="running"
+          stage={job?.stage ?? null}
+          progress={job?.progress ?? 0}
+          message={progressMessage}
+        />
+      ) : null}
     </main>
   );
 }
