@@ -330,7 +330,6 @@ function Studio({
       />
 
       <div className="studio-layout">
-        <UploadForm disabled={starting || active} onStart={handleStart} />
         <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
         <section className="panel">
           <ClickControls
@@ -352,10 +351,8 @@ function Studio({
             }}
           />
         </section>
+        <UploadForm disabled={starting || active} onStart={handleStart} />
       </div>
-
-      <hr className="studio-separator" />
-
       <div className="processing-area">
         {job?.status === "running" || starting ? (
           <ProgressPanel
