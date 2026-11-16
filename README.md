@@ -1,8 +1,9 @@
 <img width="2172" height="724" alt="image" src="https://github.com/user-attachments/assets/79c53604-e543-48d9-a615-13c59f2b97b3" />
+<img width="1903" height="958" alt="image" src="https://github.com/user-attachments/assets/e7680c25-ac86-4bda-b9ab-063e8b824cb0" />
 
 Builds a **drum-free backing track** from any song, auto-detects its **tempo (BPM)**,
 and generates a **click track** locked to that tempo - great for focused practice reps.
-
+---
 ### Features
 - Drum separation via Demucs AI model
 - Auto BPM detection from drum stem
@@ -21,8 +22,7 @@ Two clients, one processing engine:
 | **Android app** | Kotlin + Jetpack Compose | `android/` |
 | **API backend** | FastAPI wrapping the Python pipeline | `server/` |
 | **Web UI** | React + TypeScript + Vite | `frontend/` |
-
-<img width="1903" height="958" alt="image" src="https://github.com/user-attachments/assets/e7680c25-ac86-4bda-b9ab-063e8b824cb0" />
+---
 
 ## How to run
 
