@@ -1,7 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it } from "vitest";
+import { vi, afterEach, describe, expect, it } from "vitest";
 import { Landing } from "./Landing";
+
+vi.mock("./components/DrumKitParticles", () => ({
+  DrumKitParticles: () => null,
+}));
 
 afterEach(() => {
   window.history.pushState({}, "", "/");
