@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { vi, afterEach, describe, expect, it } from "vitest";
 import Root from "./Root";
+
+vi.mock("./components/DrumKitParticles", () => ({
+  DrumKitParticles: () => null,
+}));
 
 afterEach(() => {
   window.history.pushState({}, "", "/");
