@@ -329,34 +329,42 @@ function Studio({
         onRefresh={() => void refreshTracks()}
       />
 
-      <div className="layout">
+      <div className="studio-layout">
         <UploadForm disabled={starting || active} onStart={handleStart} />
         <AudioPanel mixedUrl={mixedUrl} backingUrl={backingUrl} />
-        <ProgressPanel
-          status={progressStatus}
-          stage={job?.stage ?? null}
-          progress={job?.progress ?? 0}
-          message={progressMessage}
-        />
-        <ClickControls
-          gainDb={gainDb}
-          disabled={!isDone}
-          applying={applying}
-          onChange={setGainDb}
-          onApply={handleApply}
-        />
-        <BpmControls
-          value={bpm}
-          detectedBpm={detectedBpm}
-          tempoSource={job?.tempo_source ?? null}
-          disabled={!isDone}
-          onChange={(next) => {
-            if (jobId !== null) {
-              setBpmEdit({ jobId, value: next });
-            }
-          }}
-        />
-        <DownloadPanel backing={downloads.backing} mixed={downloads.mixed} />
+        <div className="studio-right-column">
+          <ClickControls
+            gainDb={gainDb}
+            disabled={!isDone}
+            applying={applying}
+            onChange={setGainDb}
+            onApply={handleApply}
+          />
+          <BpmControls
+            value={bpm}
+            detectedBpm={detectedBpm}
+            tempoSource={job?.tempo_source ?? null}
+            disabled={!isDone}
+            onChange={(next) => {
+              if (jobId !== null) {
+                setBpmEdit({ jobId, value: next });
+              }
+            }}
+          />
+        </div>
+      </div>
+
+      <hr className="studio-separator" />
+
+      <div className="processing-area">
+        {job?.status === "running" || starting ? (
+          <ProgressPanel
+            status="running"
+            stage={job?.stage ?? null}
+            progress={job?.progress ?? 0}
+            message={progressMessage}
+          />
+        ) : null}
       </div>
     </main>
   );
