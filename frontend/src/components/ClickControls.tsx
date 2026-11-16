@@ -21,7 +21,7 @@ export function ClickControls({
   }
 
   return (
-    <section className="panel">
+    <section>
       <h2>Click volume</h2>
 
       <label htmlFor="click-gain">Click volume (dB)</label>
