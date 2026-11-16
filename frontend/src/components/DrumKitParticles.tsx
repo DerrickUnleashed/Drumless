@@ -7,8 +7,10 @@ import { MeshSurfaceSampler } from "three/examples/jsm/math/MeshSurfaceSampler.j
 
 const MODEL_PATH = "/drum_kit.glb";
 
-const PARTICLE_COUNT = 300000;
-const PARTICLE_SIZE = 1;
+const IS_MOBILE = navigator.maxTouchPoints > 1 || window.matchMedia("(max-width: 768px)").matches;
+
+const PARTICLE_COUNT = IS_MOBILE ? 3000 : 300000;
+const PARTICLE_SIZE = IS_MOBILE ? 1.2 : 1;
 const MOUSE_RADIUS_PX = 110;
 
 const VERTEX_SHADER = `
