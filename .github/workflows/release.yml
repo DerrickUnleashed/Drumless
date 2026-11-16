@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -14,18 +17,26 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: server/requirements.txt
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip
           pip install -r server/requirements.txt
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Build frontend
         working-directory: ./frontend
@@ -33,16 +44,15 @@ jobs:
           npm ci
           npm run build
 
-      - name: Archive frontend artifacts
-        run: |
-          mkdir -p dist
-          cp -r frontend/dist ./dist/
+      - name: Package frontend build
+        run: tar -czf drumless-frontend-${{ github.ref_name }}.tar.gz -C frontend dist
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
+          files: drumless-frontend-${{ github.ref_name }}.tar.gz
           body: |
             ### What's Changed
             Auto-generated release from main branch.
@@ -58,11 +68,11 @@ jobs:
             - Click volume control (-20 dB to +6 dB)
 
             ### Build Information
-            - Frontend: Built with Vite + React + TypeScript
-            - Backend: FastAPI + Python pipeline (Demucs + librosa)
-            - Mobile: Android (Kotlin / Jetpack Compose)
+            - **Frontend:** Built with Vite + React + TypeScript
+            - **Backend:** FastAPI + Python pipeline (Demucs + librosa)
+            - **Mobile:** Android (Kotlin / Jetpack Compose)
 
             ---
-            **Full Changelog**: Auto-generated from main branch
+            **Full Changelog**: https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}
           draft: false
           prerelease: false
