@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r server/requirements.txt
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Archive frontend artifacts
+        run: |
+          mkdir -p dist
+          cp -r frontend/dist ./dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ### What's Changed
+            Auto-generated release from main branch.
+
+            ### Highlights
+            - Drum separation via Demucs AI model
+            - Auto BPM detection from drum stem
+            - Click track locked to first beat
+            - YouTube URL or local audio file input
+            - WAV & MP3 download options
+            - Backing (no drums) + Mixed (backing + click) tracks
+            - BPM halve/double adjustment
+            - Click volume control (-20 dB to +6 dB)
+
+            ### Build Information
+            - Frontend: Built with Vite + React + TypeScript
+            - Backend: FastAPI + Python pipeline (Demucs + librosa)
+            - Mobile: Android (Kotlin / Jetpack Compose)
+
+            ---
+            **Full Changelog**: ${{ github.compare(github.event.repository.default_branch, github.sha) }}
+          draft: false
+          prerelease: false
