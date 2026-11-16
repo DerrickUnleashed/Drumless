@@ -22,7 +22,7 @@ Two clients, one processing engine:
 | **API backend** | FastAPI wrapping the Python pipeline | `server/` |
 | **Web UI** | React + TypeScript + Vite | `frontend/` |
 
----
+<img width="1903" height="958" alt="image" src="https://github.com/user-attachments/assets/e7680c25-ac86-4bda-b9ab-063e8b824cb0" />
 
 ## How to run
 
