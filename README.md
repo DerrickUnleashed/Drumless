@@ -3,6 +3,17 @@
 Builds a **drum-free backing track** from any song, auto-detects its **tempo (BPM)**,
 and generates a **click track** locked to that tempo - great for focused practice reps.
 
+### Features
+- Drum separation via Demucs AI model
+- Auto BPM detection from drum stem
+- Click track locked to first beat
+- YouTube URL or local audio file input
+- WAV & MP3 download options
+- Backing (no drums) + Mixed (backing + click) tracks
+- BPM halve/double adjustment
+- Click volume control (-20 dB to +6 dB)
+- Three-client: Android (Kotlin/Compose), Web (React/TS), API (FastAPI/Python)
+
 Two clients, one processing engine:
 
 | Layer | Tech | Location |
