@@ -1,12 +1,13 @@
-.venv
+# Python
+.venv/
 __pycache__/
 
-# pipeline artifacts
+# Pipeline artifacts
 separated/
 drumless_output/
 server/data/
 
-# android
+# Android build outputs
 android/.gradle/
 android/build/
 android/app/build/
@@ -17,13 +18,33 @@ captures/
 .externalNativeBuild/
 .cxx/
 
+# Dependencies and lockfiles
+node_modules/
+package-lock.json
+yarn.lock
+p-lock.json
+
+# Environment files (keep .env.example visible)
+.env*
+/.env*
+/.env.*
+
+# IDE and build temp
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# OS
+.DS_Store
+captures/
+
+# Temporary
+/tmp/
+/.cache/
 commit.sh
-# secrets / local env
-.env
-.env.*
-!.env.example
-*/.env
-*/.env.*
-!*/.env.example
-supabase/.temp/
-android/.idea/
