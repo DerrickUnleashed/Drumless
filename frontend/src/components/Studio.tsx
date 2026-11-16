@@ -241,21 +241,8 @@ function Studio({
     <main className="app">
       <nav className="studio-nav" aria-label="Breadcrumb">
         <Link to="/" className="back-link">
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m12 19-7-7 7-7" />
-            <path d="M19 12H5" />
-          </svg>
-          Home
+          <img className="brand-logo" src="/drum-set.png" alt="" width={30} height={30} />
+          <span className="studio-nav-title">Drumless</span>
         </Link>
         <span className="studio-nav-title">Studio</span>
         {authed ? (
