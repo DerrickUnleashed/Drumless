@@ -87,9 +87,8 @@ body {
 .studio-nav-title {
   color: var(--muted);
   font-size: 0.9rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.1em;
 }
 
 .hero {
