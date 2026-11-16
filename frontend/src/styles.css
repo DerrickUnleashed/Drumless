@@ -599,6 +599,10 @@ button:disabled {
   box-shadow: var(--surface-shadow);
 }
 
+.panel:hover {
+  border-color: var(--accent);
+}
+
 /* Glass: refraction layer + specular sheen */
 .panel::before,
 .panel::after,
