@@ -7,8 +7,10 @@ import { MeshSurfaceSampler } from "three/examples/jsm/math/MeshSurfaceSampler.j
 
 const MODEL_PATH = "/drum_kit.glb";
 
-const PARTICLE_COUNT = 300000;
-const PARTICLE_SIZE = 1;
+const IS_MOBILE = navigator.maxTouchPoints > 1 || window.matchMedia("(max-width: 768px)").matches;
+
+const PARTICLE_COUNT = IS_MOBILE ? 3000 : 300000;
+const PARTICLE_SIZE = IS_MOBILE ? 1.2 : 1;
 const MOUSE_RADIUS_PX = 110;
 
 const VERTEX_SHADER = `
@@ -173,6 +175,8 @@ export function DrumKitParticles() {
 
     controls.target.set(0, 0, 0);
     controls.update();
+
+    controls.enabled = !IS_MOBILE;
 
     // ================================================
     // PARTICLE STATE
@@ -545,20 +549,22 @@ export function DrumKitParticles() {
         -((event.clientY - rect.top) / rect.height) * 2 + 1;
     };
 
-    canvas.addEventListener(
-      "pointerenter",
-      onPointerEnter
-    );
+    if (!IS_MOBILE) {
+      canvas.addEventListener(
+        "pointerenter",
+        onPointerEnter
+      );
 
-    canvas.addEventListener(
-      "pointerleave",
-      onPointerLeave
-    );
+      canvas.addEventListener(
+        "pointerleave",
+        onPointerLeave
+      );
 
-    canvas.addEventListener(
-      "pointermove",
-      onPointerMove
-    );
+      canvas.addEventListener(
+        "pointermove",
+        onPointerMove
+      );
+    }
 
     // Hard-lock zoom. Stop wheel events before OrbitControls sees
     // them (page still scrolls), and block browser pinch-zoom over
@@ -571,10 +577,12 @@ export function DrumKitParticles() {
       }
     }
 
-    stage.addEventListener("wheel", blockWheel, {
-      capture: true,
-      passive: false,
-    });
+    if (!IS_MOBILE) {
+      stage.addEventListener("wheel", blockWheel, {
+        capture: true,
+        passive: false,
+      });
+    }
 
     // ================================================
     // RESIZE
