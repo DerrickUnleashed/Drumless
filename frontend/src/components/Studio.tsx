@@ -244,7 +244,7 @@ function Studio({
           <img className="brand-logo" src="/drum-set.png" alt="" width={30} height={30} />
           <span className="studio-nav-title">Drumless</span>
         </Link>
-        <span className="studio-nav-title">Studio</span>
+        <span className="studio-nav-title">STUDIO</span>
         {authed ? (
           <div className="studio-account">
             {email ? <span className="studio-account-email">{email}</span> : null}
