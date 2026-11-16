@@ -421,6 +421,11 @@
   background-color: var(--surface-bg);
   background-image: var(--surface-sheen), var(--surface-glow);
   box-shadow: var(--surface-shadow);
+  transition: border-color 0.2s ease;
+}
+
+.step:hover {
+  border-color: var(--accent);
 }
 
 .step-number {
@@ -457,6 +462,11 @@
   background-color: var(--surface-bg);
   background-image: var(--surface-sheen), var(--surface-glow);
   box-shadow: var(--surface-shadow);
+  transition: border-color 0.2s ease;
+}
+
+.cta-band:hover {
+  border-color: var(--accent);
 }
 
 .cta-copy h2 {
