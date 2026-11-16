@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Background & surfaces -->
+    <color name="bg">#0b0916</color>
+    <color name="panel">#14112a</color>
+    <color name="panel_strong">#211a3c</color>
+    <color name="border">#322a4d</color>
+
+    <!-- Text -->
+    <color name="text">#ece9f7</color>
+    <color name="muted">#a8a2c8</color>
+
+    <!-- Accent (gold) -->
+    <color name="accent">#f2b544</color>
+    <color name="accent_strong">#ffd479</color>
+
+    <!-- Action colors -->
+    <color name="danger">#ff7a7a</color>
+    <color name="success">#6fe3a4</color>
+</resources>
