@@ -51,7 +51,7 @@ export function BpmControls({
   }
 
   return (
-    <section className="panel">
+    <section>
       <h2>BPM</h2>
 
       {detectedBpm !== null ? (
