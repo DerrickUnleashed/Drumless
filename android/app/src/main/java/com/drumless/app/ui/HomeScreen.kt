@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -43,11 +44,16 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text("Drumless", style = MaterialTheme.typography.headlineLarge)
+        Text(
+            "Drumless",
+            style = MaterialTheme.typography.headlineLarge,
+            color = Color(0xFFECE9F7)
+        )
         Text(
             "Remove the drums, lock a click to the detected tempo, and practice. " +
                 "Processing happens on your backend server - this app talks to it.",
             style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFFA8A2C8)
         )
 
         OutlinedTextField(
@@ -55,7 +61,7 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
             onValueChange = { urlInput = it },
             label = { Text("YouTube URL (optional)") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
         )
         Button(
             onClick = {
@@ -64,21 +70,29 @@ fun HomeScreen(vm: MainViewModel, state: UiState) {
             },
             enabled = urlInput.isNotBlank() && !state.submitting,
             modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Process YouTube URL")
-        }
+            content = {
+                Text("Process YouTube URL")
+            }
+        )
 
         OutlinedButton(
             onClick = { picker.launch("audio/*") },
             enabled = !state.submitting,
             modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(pickedName?.let { "Processing “$it”…" } ?: "Pick audio file")
-        }
+            content = {
+                Text(pickedName?.let { "Processing “$it”…" } ?: "Pick audio file")
+            }
+        )
 
         if (state.error != null) {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-                Text(state.error, Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onErrorContainer)
+            Card(
+                modifier = Modifier.padding(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFFF7A7A),
+                    contentColor = Color(0xFF1A1205)
+                )
+            ) {
+                Text(state.error, color = Color(0xFF1A1205))
             }
         }
     }
