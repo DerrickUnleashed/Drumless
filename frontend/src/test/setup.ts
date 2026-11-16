@@ -55,50 +55,12 @@ vi.mock("three", () => {
   };
 
   const mockRenderer = class {
-    constructor(options: any = {}) {
-      this.domElement = options.canvas || document.createElement("canvas");
-      this.context = mockContext;
-      this.alpha = options.alpha ?? true;
-      this.antialias = options.antialias ?? true;
-      this.pixelRatio = 1;
-      this.autoClear = true;
-    }
-    setPixelRatio() {}
-    setSize() {}
-    render() {}
-    dispose() {}
-    setClearColor() {}
-  };
-
-  const Color = class {
-    constructor(value: number) {
-      this.r = ((value >> 16) & 255) / 255;
-      this.g = ((value >> 8) & 255) / 255;
-      this.b = (value & 255) / 255;
-    }
-  };
-
-  const Fog = class {
-    constructor() {}
-  };
-
-  const mockVector3 = class {
-    constructor(x: number, y: number, z: number) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-    }
-    set(x: number, y: number, z: number) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-    }
-    clone() {
-      return new mockVector3(this.x, this.y, this.z);
-    }
-  };
-
-  const mockRendererWithColor = class {
+    domElement: any;
+    context: any;
+    alpha: boolean;
+    antialias: boolean;
+    pixelRatio: number;
+    autoClear: boolean;
     constructor(options: any = {}) {
       this.domElement = options.canvas || document.createElement("canvas");
       this.context = mockContext;
@@ -115,56 +77,7 @@ vi.mock("three", () => {
   };
 
   return {
-    WebGLRenderer: mockRendererWithColor,
-    Scene: class {
-      constructor() {
-        this.background = new Color(0x000000);
-        this.fog = new Fog();
-      }
-    },
-    PerspectiveCamera: class {
-      constructor(fov: number, aspect: number, near: number, far: number) {
-        this.fov = fov;
-        this.aspect = aspect;
-        this.near = near;
-        this.far = far;
-        this.position = new mockVector3(0, 1.7, 10.5);
-      }
-    },
-    Vector3: class {
-      constructor(x: number, y: number, z: number) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-      }
-    },
-    AmbientLight: class {
-      constructor(color: number, intensity: number) {
-        this.color = new Color(color);
-        this.intensity = intensity;
-      }
-    },
-    DirectionalLight: class {
-      constructor(color: number, intensity: number) {
-        this.color = new Color(color);
-        this.intensity = intensity;
-      }
-    },
-    CubeTextureLoader: class {
-      load() {
-        return { textures: [] };
-      }
-    },
-    FileLoader: class {
-      load() {
-        return { default: null };
-      }
-    },
-    TextureLoader: class {
-      load() {
-        return null;
-      }
-    },
+    WebGLRenderer: mockRenderer,
   };
 });
 
